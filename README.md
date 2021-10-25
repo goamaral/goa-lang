@@ -5,8 +5,7 @@ Bringing syntax sugar to improve development speed.
 # Supported features
 - Basic testable program
   - [ ] Main function
-  - [ ] Package definition
-  - [ ] fmt.Println
+  - [ ] Core.println
   - [ ] Untyped constants
     - [ ] Boolean
       - [ ] true
