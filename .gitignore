@@ -16,5 +16,5 @@
 vendor/
 
 ### Goyacc ###
-v1/parser.go
+v1/parser/parser.go
 v1/parser.output
