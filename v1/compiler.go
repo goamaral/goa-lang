@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/Goamaral/goa-lang/v1/codegen"
 	"github.com/Goamaral/goa-lang/v1/parser"
 )
 
@@ -26,5 +27,6 @@ func main() {
 		}
 	}
 
-	parser.Parse(string(sourceCodeBytes))
+	syntaxTree := parser.Parse(string(sourceCodeBytes))
+	println(codegen.Generate(&syntaxTree))
 }

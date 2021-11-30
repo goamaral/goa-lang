@@ -24,7 +24,7 @@ import "github.com/Goamaral/goa-lang/v1/ast"
 %left '&'
 %left '+'  '-'
 %left '*'  '/'  '%'
-%left UMINUS      /*  supplies  precedence  for  unary  minus  */
+%left UMINUS      /*  supplies precedence for unary minus */
 
 %%
 FunctionDefinition: DEF ID DO END { syntaxTree.AddFuncDef($2) };
@@ -33,7 +33,7 @@ FunctionDefinition: DEF ID DO END { syntaxTree.AddFuncDef($2) };
 var syntaxTree ast.Ast
 
 func Parse(sourceCode string) (ast.Ast) {
-	syntaxTree = ast.NewAst()
+	syntaxTree = ast.New()
 
 	lex := lexer{code: sourceCode}
 	yyParse(&lex)

@@ -21,22 +21,20 @@ var nodeKind_nameMap = map[NodeKind]string{
 
 /* AST */
 type Ast struct {
-	root Node
+	Root *Node
 }
 
-func NewAst() Ast {
+func New() Ast {
 	return Ast{
-		root: Node{
-			kind: Prog,
-		},
+		Root: &Node{Kind: Prog},
 	}
 }
 
-func (a Ast) Print() {
+func (a *Ast) Print() {
 	fmt.Println("===== AST =====")
-	fmt.Println(a.root.String())
+	fmt.Println(a.Root.String())
 
-	for _, node := range a.root.children {
+	for _, node := range a.Root.Children {
 		fmt.Println(node.String())
 	}
 
@@ -44,26 +42,26 @@ func (a Ast) Print() {
 }
 
 func (a *Ast) AddFuncDef(name string) {
-	newNode := &Node{kind: FuncDef, value: name}
-	a.root.addChild(newNode)
+	newNode := &Node{Kind: FuncDef, Value: name}
+	a.Root.addChild(newNode)
 }
 
 /* NODE */
 type Node struct {
-	kind     NodeKind
-	value    string
-	children []*Node
+	Kind     NodeKind
+	Value    string
+	Children []*Node
 }
 
-func (n Node) String() string {
-	switch n.kind {
+func (n *Node) String() string {
+	switch n.Kind {
 	case FuncDef:
-		return fmt.Sprintf("%s(%s)", nodeKind_nameMap[n.kind], n.value)
+		return fmt.Sprintf("%s(%s)", nodeKind_nameMap[n.Kind], n.Value)
 	default:
-		return nodeKind_nameMap[n.kind]
+		return nodeKind_nameMap[n.Kind]
 	}
 }
 
 func (n *Node) addChild(child *Node) {
-	n.children = append(n.children, child)
+	n.Children = append(n.Children, child)
 }

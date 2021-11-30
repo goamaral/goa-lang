@@ -1,4 +1,3 @@
-- Codegen basic main function
 - Write to file
 - Parse flag --precompile to only generate go code
 - Parse flags -o flag to set output filename
