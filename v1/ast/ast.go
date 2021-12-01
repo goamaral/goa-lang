@@ -2,31 +2,13 @@ package ast
 
 import "fmt"
 
-type NodeKind int
-
-const (
-	// NON TERMINALS
-	Prog NodeKind = iota
-	FuncDef
-
-	// TERMINALS
-	Id
-)
-
-var nodeKind_nameMap = map[NodeKind]string{
-	Prog:    "PROG",
-	FuncDef: "FUNC_DEF",
-	Id:      "ID",
-}
-
-/* AST */
 type Ast struct {
-	Root *Node
+	Root Node
 }
 
 func New() Ast {
 	return Ast{
-		Root: &Node{Kind: Prog},
+		Root: Node{Kind: Prog},
 	}
 }
 
@@ -42,26 +24,6 @@ func (a *Ast) Print() {
 }
 
 func (a *Ast) AddFuncDef(name string) {
-	newNode := &Node{Kind: FuncDef, Value: name}
+	newNode := Node{Kind: FuncDef, Value: name}
 	a.Root.addChild(newNode)
-}
-
-/* NODE */
-type Node struct {
-	Kind     NodeKind
-	Value    string
-	Children []*Node
-}
-
-func (n *Node) String() string {
-	switch n.Kind {
-	case FuncDef:
-		return fmt.Sprintf("%s(%s)", nodeKind_nameMap[n.Kind], n.Value)
-	default:
-		return nodeKind_nameMap[n.Kind]
-	}
-}
-
-func (n *Node) addChild(child *Node) {
-	n.Children = append(n.Children, child)
 }

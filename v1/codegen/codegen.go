@@ -1,27 +1,20 @@
 package codegen
 
 import (
-	"fmt"
+	"bufio"
+	"os"
 
 	"github.com/Goamaral/goa-lang/v1/ast"
 )
 
-var code string
-
-func Generate(syntaxTree *ast.Ast) (code string) {
-	code = "package main;\n"
-	consumeNode(syntaxTree.Root)
-
-	return code
-}
-
-func consumeNode(node *ast.Node) {
-	switch node.Kind {
-	case ast.FuncDef:
-		code = fmt.Sprintf("%sfunc %s() {\n}\n", code, node.Value)
+func Generate(syntaxTree *ast.Ast, outputFile *os.File) {
+	if outputFile == nil {
+		outputFile = os.Stdout
 	}
+	writer := bufio.NewWriter(outputFile)
 
-	for _, childNode := range node.Children {
-		consumeNode(childNode)
-	}
+	writer.WriteString("package main;\n\n")
+
+	syntaxTree.Root.CodeGen(writer)
+	writer.Flush()
 }

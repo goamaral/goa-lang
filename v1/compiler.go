@@ -1,32 +1,43 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 
 	"github.com/Goamaral/goa-lang/v1/codegen"
 	"github.com/Goamaral/goa-lang/v1/parser"
+	"github.com/Goamaral/goa-lang/v1/parser/lexer"
 )
 
 func main() {
+	var stopAtLexer bool
+	flag.BoolVar(&stopAtLexer, "lexer", false, "Stops compiler after lexer is complete")
+	flag.Parse()
+
 	// Reading source code from file to stdin
 	var sourceCodeBytes []byte
 	var err error
-	if len(os.Args) == 1 {
-		sourceCodeBytes, err = ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			fmt.Println("Error reading stdin")
-			return
-		}
-	} else {
-		sourceCodeBytes, err = ioutil.ReadFile(os.Args[1])
-		if err != nil {
-			fmt.Printf("Error reading %s\n", os.Args[1])
-			return
-		}
+
+	sourceFileLocation := os.Args[len(os.Args)-1]
+	sourceCodeBytes, err = ioutil.ReadFile(sourceFileLocation)
+	if err != nil {
+		fmt.Printf("Error reading %s\n", sourceFileLocation)
+		return
 	}
 
-	syntaxTree := parser.Parse(string(sourceCodeBytes))
-	println(codegen.Generate(&syntaxTree))
+	// Lexing
+	lex := lexer.New(string(sourceCodeBytes))
+	lex.Parse()
+	lex.Print()
+	if stopAtLexer {
+		return
+	}
+
+	// Building syntax tree
+	syntaxTree := parser.Parse(&lex)
+
+	// Generate code and write to file
+	codegen.Generate(&syntaxTree, nil)
 }
