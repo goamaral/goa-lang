@@ -13,8 +13,6 @@ func Generate(syntaxTree *ast.Ast, outputFile *os.File) {
 	}
 	writer := bufio.NewWriter(outputFile)
 
-	writer.WriteString("package main;\n\n")
-
-	syntaxTree.Root.CodeGen(writer)
+	syntaxTree.Root.CodeGen(writer, 0)
 	writer.Flush()
 }

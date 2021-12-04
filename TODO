@@ -1,3 +1,5 @@
-- Write to file
-- Parse flag --precompile to only generate go code
-- Parse flags -o flag to set output filename
+- FuncDefArgs
+- FuncCallArgs
+- Parse --precompile to only generate go code
+- Parse --output flag to set output filename
+- Parse --debug to show LET and AST debugging info

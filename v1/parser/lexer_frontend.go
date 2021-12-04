@@ -8,16 +8,17 @@ import (
 
 /* CONSTANTS */
 var tokenKind_yaccTokenMap = map[lexer.Kind]int{
-	lexer.DEF:  DEF,
-	lexer.DO:   DO,
-	lexer.END:  END,
-	lexer.ID:   ID,
-	lexer.RPAR: RPAR,
-	lexer.LPAR: LPAR,
-	lexer.HASH: HASH,
+	lexer.DEF:      DEF,
+	lexer.DO:       DO,
+	lexer.END:      END,
+	lexer.UPPER_ID: UPPER_ID,
+	lexer.LOWER_ID: LOWER_ID,
+	lexer.RPAR:     RPAR,
+	lexer.LPAR:     LPAR,
+	lexer.HASH:     HASH,
 }
 
-/* STRUCTS */
+/* STRUCT */
 type lexerFrontend struct {
 	lexer      lexer.Lexer
 	tokenIndex int

@@ -9,17 +9,22 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 // as ${PREFIX}SymType, of which a reference is passed to the lexer.
 %union{
 	value string
-	node *ast.Node
+	node ast.Node
+	nodeList []ast.Node
 }
 
 // any non-terminal which returns a value needs a type, which is
 // really a field name in the above union struct
-%type <value> FunctionDefinition FunctionBody FunctionCall
+%type <node> Prog Stmt
+%type <node> FuncDef FuncDefBody
+%type <node> FuncCall GoaFuncCall
+%type <value> Id Empty
+%type <nodeList> StmtList
 
 // same for terminals
-%token <value> DEF DO END ID LPAR RPAR HASH
+%token <value> DEF DO END UPPER_ID LOWER_ID LPAR RPAR HASH
 
-%start FunctionDefinition
+%start Prog
 
 %left '|'
 %left '&'
@@ -28,11 +33,26 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %left UMINUS      /*  supplies precedence for unary minus */
 
 %%
-FunctionDefinition: DEF ID DO FunctionCall END { syntaxTree.AddFuncDef($2) };
+Prog: FuncDef { syntaxTree.Root.AddChild($1) };
 
-FunctionBody: FunctionCall { };
+/* Function Definition */
+FuncDef: DEF Id FuncDefBody { $$ = ast.NewNode(ast.FuncDef, $2, []ast.Node{$3}) };
 
-FunctionCall: HASH ID LPAR RPAR { };
+FuncDefBody: DO StmtList END { $$ = ast.NewNode(ast.FuncDefBody, "", $2) };
+
+/* Statements */
+StmtList: Stmt StmtList { $$ = append($$, $1) } | Empty { $$ = nil };
+
+Stmt: FuncCall { $$ = $1 };
+
+/* Function Call */
+FuncCall: GoaFuncCall { $$ = $1 };
+
+GoaFuncCall: HASH UPPER_ID LPAR RPAR { $$ = ast.NewNode(ast.GoaFuncCall, $2, nil) };
+
+/* Terminal */
+Id: UPPER_ID { $$ = $1 } | LOWER_ID { $$ = $1 };
+Empty: {};
 
 %%
 var syntaxTree ast.Ast

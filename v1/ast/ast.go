@@ -14,16 +14,6 @@ func New() Ast {
 
 func (a *Ast) Print() {
 	fmt.Println("===== AST =====")
-	fmt.Println(a.Root.String())
-
-	for _, node := range a.Root.Children {
-		fmt.Println(node.String())
-	}
-
+	a.Root.Print(0)
 	fmt.Println()
-}
-
-func (a *Ast) AddFuncDef(name string) {
-	newNode := Node{Kind: FuncDef, Value: name}
-	a.Root.addChild(newNode)
 }

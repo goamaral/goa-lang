@@ -4,8 +4,8 @@ Bringing syntax sugar to improve development speed.
 
 # Supported features
 - Basic testable program
-  - [ ] Main function
-  - [ ] Core.println
+  - [X] Main function
+  - [ ] #Println
   - [ ] Untyped constants
     - [ ] Boolean
       - [ ] true

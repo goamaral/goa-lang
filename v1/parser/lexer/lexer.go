@@ -13,7 +13,8 @@ var regexList = []*regexp.Regexp{
 	lparRegex,
 	rparRegex,
 	hashRegex,
-	idRegex,
+	upperIdRegex,
+	lowerIdRegex,
 }
 
 /* STRUCT */
@@ -76,6 +77,5 @@ func (l *Lexer) extractToken(chunk string) string {
 		}
 	}
 
-	l.Tokens = append(l.Tokens, token{Kind: ID, Value: chunk})
-	return ""
+	panic(fmt.Sprintf("Couldn't identify chunk '%s'", chunk))
 }
