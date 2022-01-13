@@ -16,27 +16,28 @@ var tokenKind_yaccTokenMap = map[lexer.Kind]int{
 	lexer.RPAR:     RPAR,
 	lexer.LPAR:     LPAR,
 	lexer.HASH:     HASH,
+	lexer.COMMA:    COMMA,
 }
 
 /* STRUCT */
 type lexerFrontend struct {
-	lexer      lexer.Lexer
-	tokenIndex int
+	lexer        lexer.Lexer
+	parsedTokens int
 }
 
 /* METHODS */
 func (lf *lexerFrontend) Lex(lval *yySymType) int {
-	if lf.tokenIndex < len(lf.lexer.Tokens) {
-		token := lf.lexer.Tokens[lf.tokenIndex]
+	if lf.parsedTokens < len(lf.lexer.Tokens) {
+		token := lf.lexer.Tokens[lf.parsedTokens]
 		lval.value = token.Value
-		lf.tokenIndex += 1
+		lf.parsedTokens += 1
 		return tokenKind_yaccTokenMap[token.Kind]
 	} else {
 		return 0
 	}
 }
 
-func (lf *lexerFrontend) Error(s string) {
-	fmt.Printf("Syntax error at line X, column X\n")
-	/* fmt.Printf("Syntax error at line %d, column %d\n", lf.lineNumber, lf.columnNumber) */
+func (lf *lexerFrontend) Error(err string) {
+	fmt.Printf("%s . Token %+v\n", err, lf.lexer.Tokens[lf.parsedTokens-1])
+	// fmt.Printf("Syntax error at line %d, column %d\n", lf.Tokens[lf.tokenIndex])
 }

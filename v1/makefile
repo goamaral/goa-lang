@@ -1,6 +1,6 @@
-all: compile
+all: build
 
-compile: clean parser/parser.y
+build: clean parser/parser.y
 	goyacc -o parser/parser.go -v parser.output parser/parser.y
 
 clean:

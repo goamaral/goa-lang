@@ -13,6 +13,7 @@ var regexList = []*regexp.Regexp{
 	lparRegex,
 	rparRegex,
 	hashRegex,
+	commaRegex,
 	upperIdRegex,
 	lowerIdRegex,
 }

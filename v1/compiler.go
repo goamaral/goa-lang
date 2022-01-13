@@ -12,8 +12,9 @@ import (
 )
 
 func main() {
-	var stopAtLexer bool
+	var stopAtLexer, stopAtAst bool
 	flag.BoolVar(&stopAtLexer, "lexer", false, "Stops compiler after lexer is complete")
+	flag.BoolVar(&stopAtAst, "ast", false, "Stops compiler after ast is complete")
 	flag.Parse()
 
 	// Reading source code from file to stdin
@@ -37,6 +38,9 @@ func main() {
 
 	// Building syntax tree
 	syntaxTree := parser.Parse(&lex)
+	if stopAtAst {
+		return
+	}
 
 	// Generate code and write to file
 	codegen.Generate(&syntaxTree, nil)

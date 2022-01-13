@@ -5,7 +5,7 @@ Bringing syntax sugar to improve development speed.
 # Supported features
 - Basic testable program
   - [X] Main function
-  - [ ] #Println
+  - [X] #Println
   - [ ] Untyped constants
     - [ ] Boolean
       - [ ] true

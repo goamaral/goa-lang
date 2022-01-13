@@ -7,27 +7,28 @@ import (
 )
 
 /* CONSTANTS */
-var kind_withNameMap = map[Kind]bool{
-	FuncDef:     true,
-	GoaFuncCall: true,
+var kind_withValuesMap = map[Kind]bool{
+	FuncDef:      true,
+	GoaFuncCall:  true,
+	FuncCallArgs: true,
 }
 
 /* STRUCT */
 type Node struct {
 	Kind     Kind
-	Value    string
+	Values   []string
 	Children []Node
 }
 
 /* FUNCTIONS */
-func NewNode(kind Kind, value string, children []Node) Node {
-	return Node{Kind: kind, Value: value, Children: children}
+func NewNode(kind Kind, values []string, children []Node) Node {
+	return Node{Kind: kind, Values: values, Children: children}
 }
 
 /* METHODS */
 func (n *Node) String() string {
-	if kind_withNameMap[n.Kind] {
-		return fmt.Sprintf("%s(%s)", n.Kind.String(), n.Value)
+	if kind_withValuesMap[n.Kind] {
+		return fmt.Sprintf("%s(%s)", n.Kind.String(), strings.Join(n.Values, ", "))
 	} else {
 		return n.Kind.String()
 	}
@@ -63,7 +64,7 @@ func (n *Node) CodeGen(writer *bufio.Writer, identation int) {
 		writer.WriteString("package main\n\n")
 
 	case FuncDef:
-		fmt.Fprintf(writer, "func %s() ", n.Value)
+		fmt.Fprintf(writer, "func %s() ", n.Values[0])
 
 	case FuncDefBody:
 		fmt.Fprint(writer, "{\n")
@@ -71,10 +72,15 @@ func (n *Node) CodeGen(writer *bufio.Writer, identation int) {
 		identation += 1
 
 	case GoaFuncCall:
-		fmt.Fprintf(writer, "%s()\n", strings.ToLower(n.Value))
+		fmt.Fprint(writer, strings.ToLower(n.Values[0]))
+		identation = 0
+		closingString = "\n"
+
+	case FuncCallArgs:
+		fmt.Fprintf(writer, "(%s)", strings.Join(n.Values, ", "))
 
 	default:
-		fmt.Fprintf(writer, "NODE: %s\n", n.Kind.String())
+		fmt.Fprintf(writer, "UNKNOWN: %s\n", n.Kind.String())
 	}
 
 	for _, childNode := range n.Children {

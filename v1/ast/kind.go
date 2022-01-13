@@ -6,17 +6,19 @@ const (
 	FuncDef
 	FuncDefBody
 	GoaFuncCall
+	FuncCallArgs
 
 	// TERMINALS
 	Id
 )
 
 var kind_nameMap = map[Kind]string{
-	Prog:        "PROG",
-	FuncDef:     "FUNC_DEF",
-	FuncDefBody: "FUNC_DEF_BODY",
-	GoaFuncCall: "GOA_FUNC_CALL",
-	Id:          "ID",
+	Prog:         "PROG",
+	FuncDef:      "FUNC_DEF",
+	FuncDefBody:  "FUNC_DEF_BODY",
+	GoaFuncCall:  "GOA_FUNC_CALL",
+	FuncCallArgs: "FUNC_CALL_ARGS",
+	Id:           "ID",
 }
 
 type Kind int

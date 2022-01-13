@@ -8,6 +8,7 @@ const (
 	RPAR
 	LPAR
 	HASH
+	COMMA
 	UPPER_ID
 	LOWER_ID
 )
@@ -19,6 +20,7 @@ var kind_nameMap = map[Kind]string{
 	RPAR:     "RPAR",
 	LPAR:     "LPAR",
 	HASH:     "HASH",
+	COMMA:    "COMMA",
 	UPPER_ID: "UPPER_ID",
 	LOWER_ID: "LOWER_ID",
 }

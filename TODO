@@ -1,5 +1,7 @@
-- FuncDefArgs
-- FuncCallArgs
-- Parse --precompile to only generate go code
-- Parse --output flag to set output filename
-- Parse --debug to show LET and AST debugging info
+- Boolean untyped constants
+- Add lineNumber and columnNumber to lexer errors
+
+- Test script
+- Parse -debug to show LEX and AST debugging info (yyErrorVerbose = true, yyDebug = 1)
+- Parse -precompile to only generate go code
+- Parse -output flag to set output filename
