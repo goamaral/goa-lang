@@ -3,6 +3,7 @@ package lexer
 import (
 	"fmt"
 	"regexp"
+	"sort"
 )
 
 /* CONSTANTS */
@@ -14,6 +15,8 @@ var regexList = []*regexp.Regexp{
 	rparRegex,
 	hashRegex,
 	commaRegex,
+	trueRegex,
+	falseRegex,
 	upperIdRegex,
 	lowerIdRegex,
 }
@@ -64,18 +67,32 @@ func (l *Lexer) extractTokens(chunk string) {
 }
 
 // Extract token from chunk
+type extractTokenMatch struct {
+	score int
+	token token
+}
+
 func (l *Lexer) extractToken(chunk string) string {
 	if len(chunk) == 0 {
 		return ""
 	}
 
+	matches := []extractTokenMatch{}
 	for _, rgx := range regexList {
 		loc := rgx.FindStringIndex(chunk)
 
 		if loc != nil && loc[0] == 0 {
-			l.Tokens = append(l.Tokens, token{Kind: regex_KindMap[rgx], Value: chunk[loc[0]:loc[1]]})
-			return chunk[loc[1]:]
+			matches = append(matches, extractTokenMatch{score: loc[1], token: token{Kind: regex_KindMap[rgx], Value: chunk[loc[0]:loc[1]]}})
 		}
+	}
+
+	sort.SliceStable(matches, func(i, j int) bool {
+		return matches[i].score > matches[j].score
+	})
+
+	if len(matches) > 0 {
+		l.Tokens = append(l.Tokens, matches[0].token)
+		return chunk[matches[0].score:]
 	}
 
 	panic(fmt.Sprintf("Couldn't identify chunk '%s'", chunk))

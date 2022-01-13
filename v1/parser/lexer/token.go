@@ -14,6 +14,8 @@ var (
 	rparRegex                   = regexp.MustCompile(`\)`)
 	hashRegex                   = regexp.MustCompile(`#`)
 	commaRegex                  = regexp.MustCompile(`,`)
+	trueRegex                   = regexp.MustCompile(`true`)
+	falseRegex                  = regexp.MustCompile(`false`)
 	upperIdRegex                = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
 	lowerIdRegex                = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
 )
@@ -26,6 +28,8 @@ var regex_KindMap = map[*regexp.Regexp]Kind{
 	rparRegex:    RPAR,
 	hashRegex:    HASH,
 	commaRegex:   COMMA,
+	trueRegex:    TRUE,
+	falseRegex:   FALSE,
 	upperIdRegex: UPPER_ID,
 	lowerIdRegex: LOWER_ID,
 }

@@ -11,6 +11,8 @@ const (
 	COMMA
 	UPPER_ID
 	LOWER_ID
+	TRUE
+	FALSE
 )
 
 var kind_nameMap = map[Kind]string{
@@ -23,6 +25,8 @@ var kind_nameMap = map[Kind]string{
 	COMMA:    "COMMA",
 	UPPER_ID: "UPPER_ID",
 	LOWER_ID: "LOWER_ID",
+	TRUE:     "TRUE",
+	FALSE:    "FALSE",
 }
 
 /* STRUCT */
