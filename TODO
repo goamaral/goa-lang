@@ -1,7 +1,8 @@
-- Boolean untyped constants
-- Add lineNumber and columnNumber to lexer errors
-
+- Untyped constant single line string
 - Test script
+
 - Parse -debug to show LEX and AST debugging info (yyErrorVerbose = true, yyDebug = 1)
+- Don't run codegen if ast fails
+- Recover from errors
 - Parse -precompile to only generate go code
 - Parse -output flag to set output filename

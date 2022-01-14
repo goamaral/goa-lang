@@ -40,6 +40,11 @@ func (lf *lexerFrontend) Lex(lval *yySymType) int {
 }
 
 func (lf *lexerFrontend) Error(err string) {
-	fmt.Printf("%s . Token %+v\n", err, lf.lexer.Tokens[lf.parsedTokens-1])
-	// fmt.Printf("Syntax error at line %d, column %d\n", lf.Tokens[lf.tokenIndex])
+	fmt.Printf(
+		"Syntax error at line %d, column %d: unexpected token \"%s\" (%s)\n",
+		lf.lexer.LineNumber,
+		lf.lexer.ColumnNumber,
+		lf.lexer.Tokens[lf.parsedTokens-1].Value,
+		err[len("syntax error: "):],
+	)
 }

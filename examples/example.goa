@@ -1,3 +1,3 @@
 def main do
-  #Println(arg1, arg2)
+  #rintln(true, false)
 end

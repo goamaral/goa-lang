@@ -23,8 +23,10 @@ var regexList = []*regexp.Regexp{
 
 /* STRUCT */
 type Lexer struct {
-	sourceCode string
-	Tokens     []token
+	sourceCode   string
+	Tokens       []token
+	LineNumber   int
+	ColumnNumber int
 }
 
 /* FUNCTIONS */
@@ -47,6 +49,14 @@ func (l *Lexer) Parse() {
 	chunk := ""
 	for i := 0; i < len(l.sourceCode); i++ {
 		c := l.sourceCode[i]
+		if c == '\n' {
+			l.LineNumber++
+			l.ColumnNumber = 0
+		} else if c == '\t' {
+			l.ColumnNumber += 2
+		} else {
+			l.ColumnNumber++
+		}
 
 		if c == ' ' || c == '\t' || c == '\n' {
 			l.extractTokens(chunk)

@@ -7,9 +7,9 @@ Bringing syntax sugar to improve development speed.
   - [X] Main function
   - [X] #Println
   - [ ] Untyped constants
-    - [ ] Boolean
-      - [ ] true
-      - [ ] false
+    - [X] Boolean
+      - [X] true
+      - [X] false
     - [ ] String
       - [ ] Single line ("")
       - [ ] Multiline (``)
