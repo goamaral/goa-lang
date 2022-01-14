@@ -2,23 +2,39 @@
 import os
 import subprocess
 
-path = os.path.dirname(os.path.abspath(__file__))
-tests_path = '%s/../tests' % path
+project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+tests_path = os.path.join(project_path, 'tests')
 
-test_results = ["FAILED", "PASSED"]
-test_name = "untyped_constants/boolean"
+def run_folder_tests(folder_path, test_name=""):
+  subfolders = [item for item in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, item))]
+  
+  # If at leaf folder, run test
+  if len(subfolders) == 0:
+    run_test(folder_path, test_name)
+  else:
+    subfolders.reverse()
+    for subfolder in subfolders:
+      run_folder_tests(os.path.join(folder_path, subfolder), os.path.join(test_name, subfolder))
 
-original_file_path = '%s/%s/original.goa' % (tests_path, test_name)
-original = open(original_file_path, "r").read()
-precompiled = open('%s/%s/precompiled.go' % (tests_path, test_name), "r").read()
-output = open('%s/%s/output' % (tests_path, test_name), "r").read()
+def run_test(test_path, test_name):
+  test_results = ["FAILED", "PASSED"]
 
-os.popen('go run %s/.. %s' % (path, original_file_path)).read()
+  # Load test files
+  precompiled = open(os.path.join(test_path, 'precompiled.go'), "r").read()
+  output = open(os.path.join(test_path, 'output'), "r").read()
 
-result_precompiled_file_path = '%s/../out/output.go' % path
-result_precompiled = open(result_precompiled_file_path, "r").read()
+  # Run compiler against test case
+  original_file_path = os.path.join(test_path, 'original.goa')
+  os.popen('go run %s %s' % (project_path, original_file_path)).read()
 
-process = subprocess.Popen(['go', 'run', result_precompiled_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-_, result_output = process.communicate()
+  # Run precompiled code
+  result_precompiled_file_path = os.path.join(project_path, 'out/output.go')
+  result_precompiled = open(result_precompiled_file_path, "r").read()
+  process = subprocess.Popen(['go', 'run', result_precompiled_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  _, result_output = process.communicate()
 
-print("TEST %s %s" % (test_name, test_results[result_precompiled == precompiled and result_output == output]))
+  # Compare result to test expected output
+  print("TEST %s %s" % (test_name, test_results[result_precompiled == precompiled and result_output == output]))
+
+if __name__ == "__main__":
+  run_folder_tests(tests_path)

@@ -1,6 +1,3 @@
-- Test script
-  - Loop each test
-
 - Untyped constant multiline string
 - Parse -debug to show LEX and AST debugging info (yyErrorVerbose = true, yyDebug = 1)
 
