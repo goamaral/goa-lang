@@ -11,7 +11,7 @@ Bringing syntax sugar to improve development speed.
       - [X] true
       - [X] false
     - [ ] String
-      - [ ] Single line ("")
+      - [X] Single line ("")
       - [ ] Multiline (``)
     - [ ] Integer
       - [ ] Integer unsigned (1)

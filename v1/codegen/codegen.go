@@ -8,10 +8,11 @@ import (
 )
 
 func Generate(syntaxTree *ast.Ast, outputFile *os.File) {
-	if outputFile == nil {
-		outputFile = os.Stdout
-	}
 	writer := bufio.NewWriter(outputFile)
+
+	if outputFile == os.Stdout {
+		writer.WriteString("===== CODEGEN =====\n")
+	}
 
 	syntaxTree.Root.CodeGen(writer, 0)
 	writer.Flush()

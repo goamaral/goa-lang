@@ -18,6 +18,7 @@ var (
 	falseRegex                  = regexp.MustCompile(`false`)
 	upperIdRegex                = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
 	lowerIdRegex                = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
+	stringRegex                 = regexp.MustCompile(`\"[^\"]*\"`)
 )
 
 var regex_KindMap = map[*regexp.Regexp]Kind{
@@ -32,6 +33,7 @@ var regex_KindMap = map[*regexp.Regexp]Kind{
 	falseRegex:   FALSE,
 	upperIdRegex: UPPER_ID,
 	lowerIdRegex: LOWER_ID,
+	stringRegex:  STRING,
 }
 
 /* STRUCT */

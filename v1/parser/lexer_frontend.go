@@ -19,6 +19,7 @@ var tokenKind_yaccTokenMap = map[lexer.Kind]int{
 	lexer.COMMA:    COMMA,
 	lexer.TRUE:     TRUE,
 	lexer.FALSE:    FALSE,
+	lexer.STRING:   STRING,
 }
 
 /* STRUCT */

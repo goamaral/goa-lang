@@ -24,7 +24,7 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %type <valueList> FuncCallArgList
 
 // same for terminals
-%token <value> DEF DO END UPPER_ID LOWER_ID LPAR RPAR HASH COMMA TRUE FALSE
+%token <value> DEF DO END UPPER_ID LOWER_ID LPAR RPAR HASH COMMA TRUE FALSE STRING
 
 %start Prog
 
@@ -58,7 +58,7 @@ FuncCallArg: Terminal { $$ = $1 };
 
 /* Terminal */
 Terminal: UntypedConstant { $$ = $1 } | Id { $$ = $1 };
-UntypedConstant: TRUE { $$ = $1 } | FALSE { $$ = $1 };
+UntypedConstant: TRUE { $$ = $1 } | FALSE { $$ = $1 } | STRING { $$ = $1 };
 Id: UPPER_ID { $$ = $1 } | LOWER_ID { $$ = $1 };
 Empty: {};
 

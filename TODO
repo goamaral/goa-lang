@@ -1,8 +1,12 @@
-- Untyped constant single line string
 - Test script
+  - Loop each test
 
+- Untyped constant multiline string
 - Parse -debug to show LEX and AST debugging info (yyErrorVerbose = true, yyDebug = 1)
+
 - Don't run codegen if ast fails
 - Recover from errors
 - Parse -precompile to only generate go code
+- Parse -precompile-output flag to set precompiled output filename
 - Parse -output flag to set output filename
+- Compile go code to binary

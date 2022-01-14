@@ -12,9 +12,12 @@ import (
 )
 
 func main() {
-	var stopAtLexer, stopAtAst bool
+	var stopAtLexer, stopAtAst, stopAtCodegen bool
+	outputFilePath := "./out/output.go"
+
 	flag.BoolVar(&stopAtLexer, "lexer", false, "Stops compiler after lexer is complete")
 	flag.BoolVar(&stopAtAst, "ast", false, "Stops compiler after ast is complete")
+	flag.BoolVar(&stopAtCodegen, "codegen", false, "Stops compiler after codegen is complete and outputs to stdout")
 	flag.Parse()
 
 	// Reading source code from file to stdin
@@ -43,5 +46,25 @@ func main() {
 	}
 
 	// Generate code and write to file
-	codegen.Generate(&syntaxTree, nil)
+	var outputFile *os.File
+	if stopAtCodegen {
+		outputFile = os.Stdout
+	} else {
+		_, err := os.Stat("out")
+		if os.IsNotExist(err) {
+			err := os.Mkdir("out", 0755)
+			if err != nil {
+				fmt.Println("Error creating out folder")
+				return
+			}
+		}
+
+		outputFile, err = os.Create(outputFilePath)
+		if err != nil {
+			fmt.Printf("Error writting to %s\n", outputFilePath)
+		}
+		defer outputFile.Close()
+	}
+
+	codegen.Generate(&syntaxTree, outputFile)
 }

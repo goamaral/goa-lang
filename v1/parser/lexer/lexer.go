@@ -19,6 +19,7 @@ var regexList = []*regexp.Regexp{
 	falseRegex,
 	upperIdRegex,
 	lowerIdRegex,
+	stringRegex,
 }
 
 /* STRUCT */

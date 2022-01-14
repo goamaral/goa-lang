@@ -56,7 +56,7 @@ func (n *Node) CodeGen(writer *bufio.Writer, identation int) {
 	closingString := ""
 
 	for i := 0; i < identation; i++ {
-		fmt.Fprint(writer, "  ")
+		fmt.Fprint(writer, "\t")
 	}
 
 	switch n.Kind {
