@@ -17,8 +17,6 @@ def run_folder_tests(folder_path, test_name=""):
       run_folder_tests(os.path.join(folder_path, subfolder), os.path.join(test_name, subfolder))
 
 def run_test(test_path, test_name):
-  test_results = ["FAILED", "PASSED"]
-
   # Load test files
   precompiled = open(os.path.join(test_path, 'precompiled.go'), "r").read()
   output = open(os.path.join(test_path, 'output'), "r").read()
@@ -34,7 +32,21 @@ def run_test(test_path, test_name):
   _, result_output = process.communicate()
 
   # Compare result to test expected output
-  print("TEST %s %s" % (test_name, test_results[result_precompiled == precompiled and result_output == output]))
+  precompiled_test_passed = result_precompiled == precompiled
+  output_test_passed = result_output == output
+  test_passed = precompiled_test_passed and output_test_passed
+
+  if not test_passed:
+    test_resul_message_parts = []
+    if not precompiled_test_passed:
+      test_resul_message_parts.append("precompiled code not valid")
+    if not output_test_passed:
+      test_resul_message_parts.append("output not valid")
+    test_resul_message = "FAILURE (%s)" % ", ".join(test_resul_message_parts)
+  else:
+    test_resul_message = "SUCCESS"
+  
+  print("TEST %s %s" % (test_name, test_resul_message))
 
 if __name__ == "__main__":
   run_folder_tests(tests_path)

@@ -1,0 +1,3 @@
+def main do
+  #Println("string", "string2\n", "string3")
+end
