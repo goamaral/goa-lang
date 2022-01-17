@@ -1,4 +1,4 @@
 def main do
   #Println(true, false)
-  #Println("abc", "asd")
+  #Println("\tabc", "asd")
 end

@@ -10,6 +10,8 @@ const (
 
 	// TERMINALS
 	Id
+	Boolean
+	String
 )
 
 var kind_nameMap = map[Kind]string{
@@ -19,6 +21,8 @@ var kind_nameMap = map[Kind]string{
 	GoaFuncCall:  "GOA_FUNC_CALL",
 	FuncCallArgs: "FUNC_CALL_ARGS",
 	Id:           "ID",
+	Boolean:      "BOOLEAN",
+	String:       "STRING",
 }
 
 type Kind int

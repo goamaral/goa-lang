@@ -10,9 +10,7 @@ Bringing syntax sugar to improve development speed.
     - [X] Boolean
       - [X] true
       - [X] false
-    - [ ] String
-      - [X] Single line ("")
-      - [ ] Multiline (``)
+    - [X] String ("")
     - [ ] Integer
       - [ ] Integer unsigned (1)
       - [ ] Integer signed(-1)
