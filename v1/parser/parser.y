@@ -22,7 +22,7 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %type <node> Terminal UntypedConstant Id Empty FuncCallArg
 
 // same for terminals
-%token <value> DEF DO END UPPER_ID LOWER_ID LPAR RPAR HASH COMMA TRUE FALSE STRING
+%token <value> DEF DO END UPPER_ID LOWER_ID '(' ')' '#' ',' TRUE FALSE STRING
 
 %start Prog
 
@@ -48,9 +48,9 @@ Stmt: FuncCall { $$ = $1 };
 /* Function Call */
 FuncCall: GoaFuncCall { $$ = $1 };
 
-GoaFuncCall: HASH UPPER_ID LPAR FuncCallArgList RPAR { $$ = ast.NewNode(ast.GoaFuncCall, []ast.Node{ast.Node{Kind: ast.Id, Value: $2}}, []ast.Node{ast.NewNode(ast.FuncCallArgs, $4, nil)}) };
+GoaFuncCall: '#' UPPER_ID '(' FuncCallArgList ')' { $$ = ast.NewNode(ast.GoaFuncCall, []ast.Node{ast.Node{Kind: ast.Id, Value: $2}}, []ast.Node{ast.NewNode(ast.FuncCallArgs, $4, nil)}) };
 
-FuncCallArgList: FuncCallArg { $$ = append($$, $1) } | FuncCallArgList COMMA FuncCallArg { $$ = append($1, $3) } | Empty { $$ = nil };
+FuncCallArgList: FuncCallArg { $$ = append($$, $1) } | FuncCallArgList ',' FuncCallArg { $$ = append($1, $3) } | Empty { $$ = nil };
 
 FuncCallArg: Terminal { $$ = $1 };
 
@@ -65,14 +65,13 @@ Empty: {};
 %%
 var syntaxTree ast.Ast
 
-func Parse(lex *lexer.Lexer) (ast.Ast) {
+func Parse(lex *lexer.Lexer, inDebugMode bool) (ast.Ast) {
 	yyErrorVerbose = true
 
 	syntaxTree = ast.New()
 	yyParse(&lexerFrontend {
 		lexer: *lex,
 	})
-	syntaxTree.Print()
 
 	return syntaxTree
 }

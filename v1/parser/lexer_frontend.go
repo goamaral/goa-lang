@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Goamaral/goa-lang/v1/parser/lexer"
 )
@@ -13,10 +14,10 @@ var tokenKind_yaccTokenMap = map[lexer.Kind]int{
 	lexer.END:      END,
 	lexer.UPPER_ID: UPPER_ID,
 	lexer.LOWER_ID: LOWER_ID,
-	lexer.RPAR:     RPAR,
-	lexer.LPAR:     LPAR,
-	lexer.HASH:     HASH,
-	lexer.COMMA:    COMMA,
+	lexer.RPAR:     ')',
+	lexer.LPAR:     '(',
+	lexer.HASH:     '#',
+	lexer.COMMA:    ',',
 	lexer.TRUE:     TRUE,
 	lexer.FALSE:    FALSE,
 	lexer.STRING:   STRING,
@@ -42,10 +43,9 @@ func (lf *lexerFrontend) Lex(lval *yySymType) int {
 
 func (lf *lexerFrontend) Error(err string) {
 	fmt.Printf(
-		"Syntax error at line %d, column %d: unexpected token \"%s\" (%s)\n",
+		"Syntax error at line %d, column %d: %s\n",
 		lf.lexer.LineNumber,
 		lf.lexer.ColumnNumber,
-		lf.lexer.Tokens[lf.parsedTokens-1].Value,
-		err[len("syntax error: "):],
+		strings.ToLower(err[len("syntax error: "):]),
 	)
 }

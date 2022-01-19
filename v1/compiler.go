@@ -12,12 +12,13 @@ import (
 )
 
 func main() {
-	var stopAtLexer, stopAtAst, stopAtCodegen bool
+	var stopAtLexer, stopAtAst, stopAtCodegen, inDebugMode bool
 	outputFilePath := "./out/output.go"
 
 	flag.BoolVar(&stopAtLexer, "lexer", false, "Stops compiler after lexer is complete")
 	flag.BoolVar(&stopAtAst, "ast", false, "Stops compiler after ast is complete")
 	flag.BoolVar(&stopAtCodegen, "codegen", false, "Stops compiler after codegen is complete and outputs to stdout")
+	flag.BoolVar(&inDebugMode, "debug", false, "Enable debug mode for more verbose output")
 	flag.Parse()
 
 	// Reading source code from file to stdin
@@ -34,13 +35,18 @@ func main() {
 	// Lexing
 	lex := lexer.New(string(sourceCodeBytes))
 	lex.Parse()
-	lex.Print()
+	if inDebugMode {
+		lex.Print()
+	}
 	if stopAtLexer {
 		return
 	}
 
 	// Building syntax tree
-	syntaxTree := parser.Parse(&lex)
+	syntaxTree := parser.Parse(&lex, inDebugMode)
+	if inDebugMode {
+		syntaxTree.Print()
+	}
 	if stopAtAst {
 		return
 	}
