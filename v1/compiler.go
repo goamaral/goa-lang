@@ -21,6 +21,8 @@ func main() {
 	flag.BoolVar(&inDebugMode, "debug", false, "Enable debug mode for more verbose output")
 	flag.Parse()
 
+	inDebugMode = stopAtLexer || stopAtAst || stopAtCodegen || inDebugMode
+
 	// Reading source code from file to stdin
 	var sourceCodeBytes []byte
 	var err error
@@ -43,11 +45,11 @@ func main() {
 	}
 
 	// Building syntax tree
-	syntaxTree := parser.Parse(&lex, inDebugMode)
+	syntaxTree, ok := parser.Parse(&lex, inDebugMode)
 	if inDebugMode {
 		syntaxTree.Print()
 	}
-	if stopAtAst {
+	if !ok || stopAtAst {
 		return
 	}
 

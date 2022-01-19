@@ -12,20 +12,21 @@ var tokenKind_yaccTokenMap = map[lexer.Kind]int{
 	lexer.DEF:      DEF,
 	lexer.DO:       DO,
 	lexer.END:      END,
-	lexer.UPPER_ID: UPPER_ID,
-	lexer.LOWER_ID: LOWER_ID,
 	lexer.RPAR:     ')',
 	lexer.LPAR:     '(',
 	lexer.HASH:     '#',
 	lexer.COMMA:    ',',
 	lexer.TRUE:     TRUE,
 	lexer.FALSE:    FALSE,
+	lexer.INTEGER:  INTEGER,
+	lexer.UPPER_ID: UPPER_ID,
+	lexer.LOWER_ID: LOWER_ID,
 	lexer.STRING:   STRING,
 }
 
 /* STRUCT */
 type lexerFrontend struct {
-	lexer        lexer.Lexer
+	lexer        *lexer.Lexer
 	parsedTokens int
 }
 

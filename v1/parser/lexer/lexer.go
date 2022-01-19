@@ -17,6 +17,7 @@ var regexList = []*regexp.Regexp{
 	commaRegex,
 	trueRegex,
 	falseRegex,
+	integerRegex,
 	upperIdRegex,
 	lowerIdRegex,
 	stringRegex,
@@ -32,7 +33,7 @@ type Lexer struct {
 
 /* FUNCTIONS */
 func New(sourceCode string) Lexer {
-	return Lexer{sourceCode: sourceCode}
+	return Lexer{sourceCode: sourceCode, LineNumber: 1, ColumnNumber: 1}
 }
 
 /* METHODS */
@@ -52,7 +53,7 @@ func (l *Lexer) Parse() {
 		c := l.sourceCode[i]
 		if c == '\n' {
 			l.LineNumber++
-			l.ColumnNumber = 0
+			l.ColumnNumber = 1
 		} else if c == '\t' {
 			l.ColumnNumber += 2
 		} else {

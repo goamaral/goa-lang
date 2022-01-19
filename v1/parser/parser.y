@@ -19,10 +19,16 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %type <node> FuncDef FuncDefBody
 %type <node> FuncCall  GoaFuncCall
 %type <nodeList> StmtList FuncCallArgList
-%type <node> Terminal UntypedConstant Id Empty FuncCallArg
+%type <node> Terminal UntypedConstant Id Empty FuncCallArg Boolean
 
-// same for terminals
-%token <value> DEF DO END UPPER_ID LOWER_ID '(' ')' '#' ',' TRUE FALSE STRING
+// Reserved words
+%token <value> DEF DO END
+
+// Operators
+%token <value> '(' ')' '#' ','
+
+// Terminals
+%token <value> UPPER_ID LOWER_ID TRUE FALSE STRING INTEGER
 
 %start Prog
 
@@ -54,24 +60,26 @@ FuncCallArgList: FuncCallArg { $$ = append($$, $1) } | FuncCallArgList ',' FuncC
 
 FuncCallArg: Terminal { $$ = $1 };
 
-/* Terminal */
+/* Terminals */
 Terminal: UntypedConstant { $$ = $1 } | Id { $$ = $1 };
-UntypedConstant: TRUE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} }
-							 | FALSE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} }
-							 | STRING { $$ = ast.Node{Kind: ast.String, Value: $1} };
 Id: UPPER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} } | LOWER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} };
+UntypedConstant: Boolean { $$ = $1 }
+							 | STRING { $$ = ast.Node{Kind: ast.String, Value: $1} }
+							 | INTEGER { $$ = ast.Node{Kind: ast.Integer, Value: $1} };
+
+Boolean: TRUE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} } | FALSE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} };
+
 Empty: {};
 
 %%
 var syntaxTree ast.Ast
 
-func Parse(lex *lexer.Lexer, inDebugMode bool) (ast.Ast) {
+func Parse(lex *lexer.Lexer, inDebugMode bool) (ast.Ast, bool) {
 	yyErrorVerbose = true
 
 	syntaxTree = ast.New()
-	yyParse(&lexerFrontend {
-		lexer: *lex,
-	})
+	lexerFrontend := lexerFrontend{lexer: lex}
+	ok := yyParse(&lexerFrontend) == 0
 
-	return syntaxTree
+	return syntaxTree, ok
 }

@@ -1,9 +1,7 @@
-- Parse -debug to show LEX and AST debugging info (yyErrorVerbose = true, yyDebug = 1)
-
-- Integer
-- Don't run codegen if ast fails
-
+- Implement basic float
 - Recover from errors
+
+- Fix line number and column number in syntax error
 - Parse -run to run precompiled code
 - Parse -precompile to only generate go code
 - Parse -precompile-output flag to set precompiled output filename

@@ -11,9 +11,9 @@ Bringing syntax sugar to improve development speed.
       - [X] true
       - [X] false
     - [X] String ("")
-    - [ ] Integer
-      - [ ] Integer unsigned (1)
-      - [ ] Integer signed(-1)
+    - [X] Integer
+      - [X] Integer unsigned (1)
+      - [X] Integer signed(-1)
     - [ ] Float
       - [ ] Basic Float unsigned (1.1)
       - [ ] Basic Float signed (-1.1)

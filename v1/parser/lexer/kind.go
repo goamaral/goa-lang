@@ -9,10 +9,11 @@ const (
 	LPAR
 	HASH
 	COMMA
-	UPPER_ID
-	LOWER_ID
 	TRUE
 	FALSE
+	INTEGER
+	UPPER_ID
+	LOWER_ID
 	STRING
 )
 
@@ -24,10 +25,11 @@ var kind_nameMap = map[Kind]string{
 	LPAR:     "LPAR",
 	HASH:     "HASH",
 	COMMA:    "COMMA",
-	UPPER_ID: "UPPER_ID",
-	LOWER_ID: "LOWER_ID",
 	TRUE:     "TRUE",
 	FALSE:    "FALSE",
+	INTEGER:  "INTEGER",
+	UPPER_ID: "UPPER_ID",
+	LOWER_ID: "LOWER_ID",
 	STRING:   "STRING",
 }
 

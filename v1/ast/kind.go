@@ -12,6 +12,7 @@ const (
 	Id
 	Boolean
 	String
+	Integer
 )
 
 var kind_nameMap = map[Kind]string{
@@ -20,9 +21,6 @@ var kind_nameMap = map[Kind]string{
 	FuncDefBody:  "FUNC_DEF_BODY",
 	GoaFuncCall:  "GOA_FUNC_CALL",
 	FuncCallArgs: "FUNC_CALL_ARGS",
-	Id:           "ID",
-	Boolean:      "BOOLEAN",
-	String:       "STRING",
 }
 
 type Kind int
