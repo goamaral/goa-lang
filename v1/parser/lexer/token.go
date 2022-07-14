@@ -16,6 +16,7 @@ var (
 	commaRegex                  = regexp.MustCompile(`,`)
 	trueRegex                   = regexp.MustCompile(`true`)
 	falseRegex                  = regexp.MustCompile(`false`)
+	nilRegex                    = regexp.MustCompile(`nil`)
 	integerRegex                = regexp.MustCompile(`-?\d+`)
 	upperIdRegex                = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
 	lowerIdRegex                = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
@@ -32,6 +33,7 @@ var regex_KindMap = map[*regexp.Regexp]Kind{
 	commaRegex:   COMMA,
 	trueRegex:    TRUE,
 	falseRegex:   FALSE,
+	nilRegex:     NIL,
 	integerRegex: INTEGER,
 	upperIdRegex: UPPER_ID,
 	lowerIdRegex: LOWER_ID,

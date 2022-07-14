@@ -15,6 +15,7 @@ const (
 	UPPER_ID
 	LOWER_ID
 	STRING
+	NIL
 )
 
 var kind_nameMap = map[Kind]string{
@@ -31,6 +32,7 @@ var kind_nameMap = map[Kind]string{
 	UPPER_ID: "UPPER_ID",
 	LOWER_ID: "LOWER_ID",
 	STRING:   "STRING",
+	NIL:      "NIL",
 }
 
 /* STRUCT */

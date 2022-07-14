@@ -17,6 +17,7 @@ var regexList = []*regexp.Regexp{
 	commaRegex,
 	trueRegex,
 	falseRegex,
+	nilRegex,
 	integerRegex,
 	upperIdRegex,
 	lowerIdRegex,

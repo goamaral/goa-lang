@@ -28,7 +28,7 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %token <value> '(' ')' '#' ','
 
 // Terminals
-%token <value> UPPER_ID LOWER_ID TRUE FALSE STRING INTEGER
+%token <value> UPPER_ID LOWER_ID TRUE FALSE STRING INTEGER NIL
 
 %start Prog
 
@@ -65,7 +65,8 @@ Terminal: UntypedConstant { $$ = $1 } | Id { $$ = $1 };
 Id: UPPER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} } | LOWER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} };
 UntypedConstant: Boolean { $$ = $1 }
 							 | STRING { $$ = ast.Node{Kind: ast.String, Value: $1} }
-							 | INTEGER { $$ = ast.Node{Kind: ast.Integer, Value: $1} };
+							 | INTEGER { $$ = ast.Node{Kind: ast.Integer, Value: $1} }
+							 | NIL { $$ = ast.Node{Kind: ast.Nil, Value: $1} };
 
 Boolean: TRUE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} } | FALSE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} };
 

@@ -2,7 +2,9 @@
 Ruby inspired syntax that is transpiled to go.
 Bringing syntax sugar to improve development speed.
 
-# Supported features
+## Usage
+
+## Supported features
 - Basic testable program
   - [X] Main function
   - [X] #Println
@@ -14,6 +16,8 @@ Bringing syntax sugar to improve development speed.
     - [X] Integer
       - [X] Integer unsigned (1)
       - [X] Integer signed(-1)
+    - [X] Nil
+      - [] Needs pointer datatype declaration with assignment to be tested
     - [ ] Float
       - [ ] Basic Float unsigned (1.1)
       - [ ] Basic Float signed (-1.1)
@@ -30,11 +34,26 @@ Bringing syntax sugar to improve development speed.
       - Integer imaginary + Float imaginary (1 + 1.1i)
       - Float imaginary + Integer imaginary (1.1 + 1i)
       - Float imaginary + Float imaginary (1.1 + 1.1i)
-    - [ ] Nil
 - Universe block
   - [ ] variable declaration
-    - [ ] ...datatypes
+    - [ ] bool
+      - [ ] bool
+      - [ ] *bool
+    - [ ] string
+      - [ ] string
+      - [ ] *string
+    - [ ] int
+      - [ ] int
+      - [ ] *int
+      - ... other sizes
+    - [ ] uint
+      - [ ] uint
+      - [ ] *uint
+      - ... other sizes
+    - ... other datatypes
   - [ ] builtin functions
+    - [ ] ... to be defined
 
-# Extended features
+## Extended features
 - [ ] C like enums
+- [ ] untyped pointer constant

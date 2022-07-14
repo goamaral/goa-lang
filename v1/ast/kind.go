@@ -13,6 +13,7 @@ const (
 	Boolean
 	String
 	Integer
+	Nil
 )
 
 var kind_nameMap = map[Kind]string{

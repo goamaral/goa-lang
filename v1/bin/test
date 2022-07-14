@@ -18,8 +18,8 @@ def run_folder_tests(folder_path, test_name=""):
 
 def run_test(test_path, test_name):
   # Load test files
-  precompiled = open(os.path.join(test_path, 'precompiled.go'), "r").read()
-  output = open(os.path.join(test_path, 'output'), "r").read()
+  expected_precompiled = open(os.path.join(test_path, 'precompiled.go'), "r").read()
+  expected_output = open(os.path.join(test_path, 'output'), "r").read()
 
   # Run compiler against test case
   original_file_path = os.path.join(test_path, 'original.goa')
@@ -32,21 +32,20 @@ def run_test(test_path, test_name):
   _, result_output = process.communicate()
 
   # Compare result to test expected output
-  precompiled_test_passed = result_precompiled == precompiled
-  output_test_passed = result_output == output
+  precompiled_test_passed = result_precompiled == expected_precompiled
+  output_test_passed = str(result_output, 'utf-8') == expected_output
   test_passed = precompiled_test_passed and output_test_passed
 
   if not test_passed:
-    test_resul_message_parts = []
+    test_result_message = "FAILURE"
     if not precompiled_test_passed:
-      test_resul_message_parts.append("precompiled code not valid")
+      test_result_message += "\n  Invalid precompiled code\n    Expected:\n%s\n    Got:\n%s" % (expected_precompiled, result_precompiled)
     if not output_test_passed:
-      test_resul_message_parts.append("output not valid")
-    test_resul_message = "FAILURE (%s)" % ", ".join(test_resul_message_parts)
+      test_result_message += "\n  Invalid output\n    Expected:\n%s\n    Got:\n%s" % (expected_output, str(result_output, 'utf-8'))
   else:
-    test_resul_message = "SUCCESS"
+    test_result_message = "SUCCESS"
   
-  print("TEST %s %s" % (test_name, test_resul_message))
+  print("TEST %s %s\n" % (test_name, test_result_message))
 
 if __name__ == "__main__":
   run_folder_tests(tests_path)
