@@ -2,7 +2,6 @@
 package parser
 
 import "github.com/Goamaral/goa-lang/v1/ast"
-import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %}
 
 // fields inside this union end up as the fields in a structure known
@@ -22,13 +21,13 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 %type <node> Terminal UntypedConstant Id Empty FuncCallArg Boolean
 
 // Reserved words
-%token <value> DEF DO END
+%token <value> Y_DEF Y_DO Y_END
 
 // Operators
 %token <value> '(' ')' '#' ','
 
 // Terminals
-%token <value> UPPER_ID LOWER_ID TRUE FALSE STRING INTEGER NIL
+%token <value> Y_UPPER_ID Y_LOWER_ID Y_TRUE Y_FALSE Y_STRING Y_INTEGER Y_NIL
 
 %start Prog
 
@@ -42,9 +41,9 @@ import "github.com/Goamaral/goa-lang/v1/parser/lexer"
 Prog: FuncDef { syntaxTree.Root.AddChild($1) };
 
 /* Function Definition */
-FuncDef: DEF Id FuncDefBody { $$ = ast.NewNode(ast.FuncDef, []ast.Node{$2}, []ast.Node{$3}) };
+FuncDef: Y_DEF Id FuncDefBody { $$ = ast.NewNode(ast.FuncDef, []ast.Node{$2}, []ast.Node{$3}) };
 
-FuncDefBody: DO StmtList END { $$ = ast.NewNode(ast.FuncDefBody, nil, $2) };
+FuncDefBody: Y_DO StmtList Y_END { $$ = ast.NewNode(ast.FuncDefBody, nil, $2) };
 
 /* Statements */
 StmtList: StmtList Stmt { $$ = append($1, $2) } | Empty { $$ = nil };
@@ -54,7 +53,7 @@ Stmt: FuncCall { $$ = $1 };
 /* Function Call */
 FuncCall: GoaFuncCall { $$ = $1 };
 
-GoaFuncCall: '#' UPPER_ID '(' FuncCallArgList ')' { $$ = ast.NewNode(ast.GoaFuncCall, []ast.Node{ast.Node{Kind: ast.Id, Value: $2}}, []ast.Node{ast.NewNode(ast.FuncCallArgs, $4, nil)}) };
+GoaFuncCall: '#' Y_UPPER_ID '(' FuncCallArgList ')' { $$ = ast.NewNode(ast.GoaFuncCall, []ast.Node{ast.Node{Kind: ast.Id, Value: $2}}, []ast.Node{ast.NewNode(ast.FuncCallArgs, $4, nil)}) };
 
 FuncCallArgList: FuncCallArg { $$ = append($$, $1) } | FuncCallArgList ',' FuncCallArg { $$ = append($1, $3) } | Empty { $$ = nil };
 
@@ -62,20 +61,20 @@ FuncCallArg: Terminal { $$ = $1 };
 
 /* Terminals */
 Terminal: UntypedConstant { $$ = $1 } | Id { $$ = $1 };
-Id: UPPER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} } | LOWER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} };
+Id: Y_UPPER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} } | Y_LOWER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} };
 UntypedConstant: Boolean { $$ = $1 }
-							 | STRING { $$ = ast.Node{Kind: ast.String, Value: $1} }
-							 | INTEGER { $$ = ast.Node{Kind: ast.Integer, Value: $1} }
-							 | NIL { $$ = ast.Node{Kind: ast.Nil, Value: $1} };
+							 | Y_STRING { $$ = ast.Node{Kind: ast.String, Value: $1} }
+							 | Y_INTEGER { $$ = ast.Node{Kind: ast.Integer, Value: $1} }
+							 | Y_NIL { $$ = ast.Node{Kind: ast.Nil, Value: $1} };
 
-Boolean: TRUE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} } | FALSE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} };
+Boolean: Y_TRUE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} } | Y_FALSE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} };
 
 Empty: {};
 
 %%
 var syntaxTree ast.Ast
 
-func Parse(lex *lexer.Lexer, inDebugMode bool) (ast.Ast, bool) {
+func Parse(lex *Lexer, inDebugMode bool) (ast.Ast, bool) {
 	yyErrorVerbose = true
 
 	syntaxTree = ast.New()

@@ -1,4 +1,4 @@
-package lexer
+package parser_yacc
 
 import (
 	"fmt"
@@ -40,6 +40,13 @@ var regex_KindMap = map[*regexp.Regexp]Kind{
 	stringRegex:  STRING,
 }
 
+var kind_ShouldDisplayValueMap = map[Kind]bool{
+	INTEGER:  true,
+	UPPER_ID: true,
+	LOWER_ID: true,
+	STRING:   true,
+}
+
 /* STRUCT */
 type token struct {
 	Kind  Kind
@@ -48,12 +55,9 @@ type token struct {
 
 /* METHODS */
 func (t *token) String() string {
-	switch t.Kind {
-	case UPPER_ID:
+	if kind_ShouldDisplayValueMap[t.Kind] {
 		return fmt.Sprintf("%s(%s)", t.Kind.String(), t.Value)
-	case LOWER_ID:
-		return fmt.Sprintf("%s(%s)", t.Kind.String(), t.Value)
-	default:
+	} else {
 		return t.Kind.String()
 	}
 }

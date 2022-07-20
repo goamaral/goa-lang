@@ -1,32 +1,30 @@
-package parser
+package parser_yacc
 
 import (
 	"fmt"
 	"strings"
-
-	"github.com/Goamaral/goa-lang/v1/parser/lexer"
 )
 
 /* CONSTANTS */
-var tokenKind_yaccTokenMap = map[lexer.Kind]int{
-	lexer.DEF:      DEF,
-	lexer.DO:       DO,
-	lexer.END:      END,
-	lexer.RPAR:     ')',
-	lexer.LPAR:     '(',
-	lexer.HASH:     '#',
-	lexer.COMMA:    ',',
-	lexer.TRUE:     TRUE,
-	lexer.FALSE:    FALSE,
-	lexer.INTEGER:  INTEGER,
-	lexer.UPPER_ID: UPPER_ID,
-	lexer.LOWER_ID: LOWER_ID,
-	lexer.STRING:   STRING,
+var tokenKind_yaccTokenMap = map[Kind]int{
+	DEF:      Y_DEF,
+	DO:       Y_DO,
+	END:      Y_END,
+	RPAR:     ')',
+	LPAR:     '(',
+	HASH:     '#',
+	COMMA:    ',',
+	TRUE:     Y_TRUE,
+	FALSE:    Y_FALSE,
+	INTEGER:  Y_INTEGER,
+	UPPER_ID: Y_UPPER_ID,
+	LOWER_ID: Y_LOWER_ID,
+	STRING:   Y_STRING,
 }
 
 /* STRUCT */
 type lexerFrontend struct {
-	lexer        *lexer.Lexer
+	lexer        *Lexer
 	parsedTokens int
 }
 

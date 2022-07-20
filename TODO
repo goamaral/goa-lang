@@ -1,3 +1,5 @@
+- Reimplement lexer with https://pkg.go.dev/text/scanner
+- Implement my own parser
 - Recover from errors
 - Fix line number and column number in syntax error
 - bool variable declaration

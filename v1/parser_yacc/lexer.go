@@ -1,4 +1,4 @@
-package lexer
+package parser_yacc
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 /* CONSTANTS */
-var regexList = []*regexp.Regexp{
+var regexPriorityList = []*regexp.Regexp{
 	defRegex,
 	doRegex,
 	endRegex,
@@ -33,8 +33,8 @@ type Lexer struct {
 }
 
 /* FUNCTIONS */
-func New(sourceCode string) Lexer {
-	return Lexer{sourceCode: sourceCode, LineNumber: 1, ColumnNumber: 1}
+func NewLexer(sourceCode string) *Lexer {
+	return &Lexer{sourceCode: sourceCode, LineNumber: 1, ColumnNumber: 1}
 }
 
 /* METHODS */
@@ -91,7 +91,7 @@ func (l *Lexer) extractToken(chunk string) string {
 	}
 
 	matches := []extractTokenMatch{}
-	for _, rgx := range regexList {
+	for _, rgx := range regexPriorityList {
 		loc := rgx.FindStringIndex(chunk)
 
 		if loc != nil && loc[0] == 0 {
