@@ -1,5 +1,6 @@
-- Reimplement lexer with https://pkg.go.dev/text/scanner
 - Implement my own parser
+- Remove yacc and implement flat package
+- Reimplement lexer with https://pkg.go.dev/text/scanner
 - Recover from errors
 - Fix line number and column number in syntax error
 - bool variable declaration
@@ -9,3 +10,4 @@
 - Parse -precompile to only generate go code
 - Parse -precompile-output flag to set precompiled output filename
 - Parse -output flag to set output filename
+- Rename v1 to transpiler

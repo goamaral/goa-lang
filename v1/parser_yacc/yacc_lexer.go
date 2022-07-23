@@ -5,15 +5,14 @@ import (
 	"strings"
 )
 
-/* CONSTANTS */
 var tokenKind_yaccTokenMap = map[Kind]int{
 	DEF:      Y_DEF,
 	DO:       Y_DO,
 	END:      Y_END,
-	RPAR:     ')',
-	LPAR:     '(',
-	HASH:     '#',
-	COMMA:    ',',
+	RPAR:     Y_RPAR,
+	LPAR:     Y_LPAR,
+	HASH:     Y_HASH,
+	COMMA:    Y_COMMA,
 	TRUE:     Y_TRUE,
 	FALSE:    Y_FALSE,
 	INTEGER:  Y_INTEGER,
@@ -22,14 +21,21 @@ var tokenKind_yaccTokenMap = map[Kind]int{
 	STRING:   Y_STRING,
 }
 
-/* STRUCT */
-type lexerFrontend struct {
+type YaccLexer interface {
+	yyLexer
+	GetToken() (token, bool)
+}
+
+type yaccLexer struct {
 	lexer        *Lexer
 	parsedTokens int
 }
 
-/* METHODS */
-func (lf *lexerFrontend) Lex(lval *yySymType) int {
+func NewYaccLexer(lexer *Lexer) YaccLexer {
+	return &yaccLexer{lexer: lexer}
+}
+
+func (lf *yaccLexer) Lex(lval *yySymType) int {
 	if lf.parsedTokens < len(lf.lexer.Tokens) {
 		token := lf.lexer.Tokens[lf.parsedTokens]
 		lval.value = token.Value
@@ -40,11 +46,21 @@ func (lf *lexerFrontend) Lex(lval *yySymType) int {
 	}
 }
 
-func (lf *lexerFrontend) Error(err string) {
+func (lf *yaccLexer) Error(err string) {
 	fmt.Printf(
 		"Syntax error at line %d, column %d: %s\n",
 		lf.lexer.LineNumber,
 		lf.lexer.ColumnNumber,
 		strings.ToLower(err[len("syntax error: "):]),
 	)
+}
+
+func (lf *yaccLexer) GetToken() (token, bool) {
+	if lf.parsedTokens < len(lf.lexer.Tokens) {
+		token := lf.lexer.Tokens[lf.parsedTokens]
+		lf.parsedTokens += 1
+		return token, true
+	} else {
+		return token{}, false
+	}
 }

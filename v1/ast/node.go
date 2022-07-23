@@ -6,27 +6,27 @@ import (
 	"strings"
 )
 
-/* CONSTANTS */
 var kind_withValuesMap = map[Kind]bool{
 	FuncDef:      true,
 	GoaFuncCall:  true,
 	FuncCallArgs: true,
 }
 
-/* STRUCT */
 type Node struct {
 	Kind       Kind
-	Properties []Node
-	Children   []Node
+	Properties []*Node
+	Children   []*Node
 	Value      string
 }
 
-/* FUNCTIONS */
-func NewNode(kind Kind, properties []Node, children []Node) Node {
-	return Node{Kind: kind, Properties: properties, Children: children}
+func NewSimpleNode(kind Kind, value string) *Node {
+	return &Node{Kind: kind, Value: value}
 }
 
-/* METHODS */
+func NewComplexNode(kind Kind, properties []*Node, children []*Node) *Node {
+	return &Node{Kind: kind, Properties: properties, Children: children}
+}
+
 func (n *Node) String() string {
 	if kind_withValuesMap[n.Kind] {
 		return fmt.Sprintf("%s(%s)", n.Kind.String(), strings.Join(n.GetPropertiesValues(false), ", "))
@@ -48,7 +48,7 @@ func (n *Node) Print(identation int) {
 	}
 }
 
-func (n *Node) AddChild(child Node) {
+func (n *Node) AddChild(child *Node) {
 	n.Children = append(n.Children, child)
 }
 
@@ -66,7 +66,6 @@ func (n *Node) GetPropertiesValues(codegen bool) (values []string) {
 	return values
 }
 
-/* METHODS - CODEGEN */
 func (n *Node) CodeGen(writer *bufio.Writer, identation int) {
 	closingString := ""
 
@@ -75,7 +74,7 @@ func (n *Node) CodeGen(writer *bufio.Writer, identation int) {
 	}
 
 	switch n.Kind {
-	case Prog:
+	case Package:
 		writer.WriteString("package main\n\n")
 
 	case FuncDef:

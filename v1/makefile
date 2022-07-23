@@ -1,7 +1,7 @@
 all: build clean
 
-build: parser/parser.y
-	goyacc -o parser/parser.go -v parser.output parser/parser.y
+build: parser_yacc/parser.y
+	goyacc -o parser_yacc/parser.go -v parser.output parser_yacc/parser.y
 
 clean:
 	rm -f parser.output

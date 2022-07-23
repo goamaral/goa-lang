@@ -1,19 +1,21 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Ast struct {
-	Root Node
+	Package *Node
 }
 
-func New() Ast {
-	return Ast{
-		Root: Node{Kind: Prog},
+func New() *Ast {
+	return &Ast{
+		Package: &Node{Kind: Package},
 	}
 }
 
 func (a *Ast) Print() {
 	fmt.Println("===== AST =====")
-	a.Root.Print(0)
+	a.Package.Print(0)
 	fmt.Println()
 }

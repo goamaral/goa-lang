@@ -2,7 +2,7 @@ package ast
 
 const (
 	// NON TERMINALS
-	Prog Kind = iota
+	Package Kind = iota
 	FuncDef
 	FuncDefBody
 	GoaFuncCall
@@ -17,7 +17,7 @@ const (
 )
 
 var kind_nameMap = map[Kind]string{
-	Prog:         "PROG",
+	Package:      "PACKAGE",
 	FuncDef:      "FUNC_DEF",
 	FuncDefBody:  "FUNC_DEF_BODY",
 	GoaFuncCall:  "GOA_FUNC_CALL",

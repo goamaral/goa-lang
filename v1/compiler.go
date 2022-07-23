@@ -34,17 +34,17 @@ func main() {
 	}
 
 	// Lexing
-	lex := parser.NewLexer(string(sourceCodeBytes))
-	lex.Parse()
+	lexer := parser.NewLexer(string(sourceCodeBytes))
+	lexer.Parse()
 	if inDebugMode {
-		lex.Print()
+		lexer.Print()
 	}
 	if stopAtLexer {
 		return
 	}
 
 	// Building syntax tree
-	syntaxTree, ok := parser.Parse(lex, inDebugMode)
+	syntaxTree, ok := parser.BuildAst(parser.NewYaccLexer(lexer), inDebugMode)
 	if inDebugMode {
 		syntaxTree.Print()
 	}
@@ -73,5 +73,5 @@ func main() {
 		defer outputFile.Close()
 	}
 
-	codegen.Generate(&syntaxTree, outputFile)
+	codegen.Generate(syntaxTree, outputFile)
 }

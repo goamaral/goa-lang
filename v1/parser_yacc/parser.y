@@ -1,5 +1,5 @@
 %{
-package parser
+package parser_yacc
 
 import "github.com/Goamaral/goa-lang/v1/ast"
 %}
@@ -8,13 +8,13 @@ import "github.com/Goamaral/goa-lang/v1/ast"
 // as ${PREFIX}SymType, of which a reference is passed to the lexer.
 %union{
 	value string
-	node ast.Node
-	nodeList []ast.Node
+	node *ast.Node
+	nodeList []*ast.Node
 }
 
 // any non-terminal which returns a value needs a type, which is
 // really a field name in the above union struct
-%type <node> Prog Stmt
+%type <node> Package Stmt
 %type <node> FuncDef FuncDefBody
 %type <node> FuncCall  GoaFuncCall
 %type <nodeList> StmtList FuncCallArgList
@@ -24,12 +24,12 @@ import "github.com/Goamaral/goa-lang/v1/ast"
 %token <value> Y_DEF Y_DO Y_END
 
 // Operators
-%token <value> '(' ')' '#' ','
+%token <value> Y_LPAR Y_RPAR Y_HASH Y_COMMA
 
 // Terminals
 %token <value> Y_UPPER_ID Y_LOWER_ID Y_TRUE Y_FALSE Y_STRING Y_INTEGER Y_NIL
 
-%start Prog
+%start Package
 
 %left '|'
 %left '&'
@@ -38,12 +38,12 @@ import "github.com/Goamaral/goa-lang/v1/ast"
 %left UMINUS      /*  supplies precedence for unary minus */
 
 %%
-Prog: FuncDef { syntaxTree.Root.AddChild($1) };
+Package: FuncDef { syntaxTree.Package.AddChild($1) };
 
 /* Function Definition */
-FuncDef: Y_DEF Id FuncDefBody { $$ = ast.NewNode(ast.FuncDef, []ast.Node{$2}, []ast.Node{$3}) };
+FuncDef: Y_DEF Id FuncDefBody { $$ = ast.NewComplexNode(ast.FuncDef, []*ast.Node{$2}, []*ast.Node{$3}) };
 
-FuncDefBody: Y_DO StmtList Y_END { $$ = ast.NewNode(ast.FuncDefBody, nil, $2) };
+FuncDefBody: Y_DO StmtList Y_END { $$ = ast.NewComplexNode(ast.FuncDefBody, nil, $2) };
 
 /* Statements */
 StmtList: StmtList Stmt { $$ = append($1, $2) } | Empty { $$ = nil };
@@ -53,33 +53,34 @@ Stmt: FuncCall { $$ = $1 };
 /* Function Call */
 FuncCall: GoaFuncCall { $$ = $1 };
 
-GoaFuncCall: '#' Y_UPPER_ID '(' FuncCallArgList ')' { $$ = ast.NewNode(ast.GoaFuncCall, []ast.Node{ast.Node{Kind: ast.Id, Value: $2}}, []ast.Node{ast.NewNode(ast.FuncCallArgs, $4, nil)}) };
+GoaFuncCall: Y_HASH Y_UPPER_ID Y_LPAR FuncCallArgList Y_RPAR { $$ = ast.NewComplexNode(ast.GoaFuncCall, []*ast.Node{ast.NewSimpleNode(ast.Id, $2)}, []*ast.Node{ast.NewComplexNode(ast.FuncCallArgs, $4, nil)}) };
 
-FuncCallArgList: FuncCallArg { $$ = append($$, $1) } | FuncCallArgList ',' FuncCallArg { $$ = append($1, $3) } | Empty { $$ = nil };
+FuncCallArgList: FuncCallArg { $$ = append($$, $1) } | FuncCallArgList Y_COMMA FuncCallArg { $$ = append($1, $3) } | Empty { $$ = nil };
 
 FuncCallArg: Terminal { $$ = $1 };
 
 /* Terminals */
 Terminal: UntypedConstant { $$ = $1 } | Id { $$ = $1 };
-Id: Y_UPPER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} } | Y_LOWER_ID { $$ = ast.Node{Kind: ast.Id, Value: $1} };
+Id: Y_UPPER_ID { $$ = ast.NewSimpleNode(ast.Id, $1) } | Y_LOWER_ID { $$ = ast.NewSimpleNode(ast.Id, $1) };
 UntypedConstant: Boolean { $$ = $1 }
-							 | Y_STRING { $$ = ast.Node{Kind: ast.String, Value: $1} }
-							 | Y_INTEGER { $$ = ast.Node{Kind: ast.Integer, Value: $1} }
-							 | Y_NIL { $$ = ast.Node{Kind: ast.Nil, Value: $1} };
+							 | Y_STRING { $$ = ast.NewSimpleNode(ast.String, $1) }
+							 | Y_INTEGER { $$ = ast.NewSimpleNode(ast.Integer, $1) }
+							 | Y_NIL { $$ = ast.NewSimpleNode(ast.Nil, $1) };
 
-Boolean: Y_TRUE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} } | Y_FALSE { $$ = ast.Node{Kind: ast.Boolean, Value: $1} };
+Boolean: Y_TRUE { $$ = ast.NewSimpleNode(ast.Boolean, $1) } | Y_FALSE { $$ = ast.NewSimpleNode(ast.Boolean, $1) };
 
 Empty: {};
 
 %%
-var syntaxTree ast.Ast
+type YaccDollar yySymType
 
-func Parse(lex *Lexer, inDebugMode bool) (ast.Ast, bool) {
+var syntaxTree *ast.Ast
+
+func BuildAst(lexer YaccLexer, inDebugMode bool) (*ast.Ast, bool) {
 	yyErrorVerbose = true
 
 	syntaxTree = ast.New()
-	lexerFrontend := lexerFrontend{lexer: lex}
-	ok := yyParse(&lexerFrontend) == 0
+	ok := yyParse(lexer) == 0
 
 	return syntaxTree, ok
 }

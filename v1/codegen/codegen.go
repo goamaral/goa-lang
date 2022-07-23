@@ -14,6 +14,6 @@ func Generate(syntaxTree *ast.Ast, outputFile *os.File) {
 		writer.WriteString("===== CODEGEN =====\n")
 	}
 
-	syntaxTree.Root.CodeGen(writer, 0)
+	syntaxTree.Package.CodeGen(writer, 0)
 	writer.Flush()
 }
