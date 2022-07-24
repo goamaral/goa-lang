@@ -1,4 +1,3 @@
-- Implement flat package
 - Reimplement lexer with https://pkg.go.dev/text/scanner
 - Recover from errors
 - Add line number and column number in errors

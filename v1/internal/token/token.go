@@ -1,4 +1,4 @@
-package parser_yacc
+package token
 
 import (
 	"fmt"

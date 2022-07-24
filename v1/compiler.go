@@ -6,9 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/Goamaral/goa-lang/v1/codegen"
-	"github.com/Goamaral/goa-lang/v1/parser"
-	"github.com/Goamaral/goa-lang/v1/parser_yacc"
+	"github.com/Goamaral/goa-lang/v1/internal"
+	"github.com/Goamaral/goa-lang/v1/internal/token"
 )
 
 func main() {
@@ -35,7 +34,7 @@ func main() {
 	}
 
 	// Lexing
-	lexer := parser_yacc.NewLexer(string(sourceCodeBytes))
+	lexer := token.NewLexer(string(sourceCodeBytes))
 	lexer.Parse()
 	if inDebugMode {
 		lexer.Print()
@@ -45,7 +44,7 @@ func main() {
 	}
 
 	// Building syntax tree
-	syntaxTree, ok := parser.BuildAst(parser_yacc.NewYaccLexer(lexer), inDebugMode)
+	syntaxTree, ok := internal.BuildAst(internal.NewYaccLexer(lexer), inDebugMode)
 	if inDebugMode && ok {
 		syntaxTree.Print()
 	}
@@ -74,5 +73,5 @@ func main() {
 		defer outputFile.Close()
 	}
 
-	codegen.Generate(syntaxTree, outputFile)
+	internal.GenerateCode(syntaxTree, outputFile)
 }
