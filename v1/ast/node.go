@@ -6,17 +6,15 @@ import (
 	"strings"
 )
 
-var kind_withValuesMap = map[Kind]bool{
-	FuncDef:      true,
-	GoaFuncCall:  true,
-	FuncCallArgs: true,
-}
-
 type Node struct {
 	Kind       Kind
 	Properties []*Node
 	Children   []*Node
 	Value      string
+}
+
+func NewNode(kind Kind) *Node {
+	return &Node{Kind: kind}
 }
 
 func NewSimpleNode(kind Kind, value string) *Node {
@@ -28,11 +26,15 @@ func NewComplexNode(kind Kind, properties []*Node, children []*Node) *Node {
 }
 
 func (n *Node) String() string {
-	if kind_withValuesMap[n.Kind] {
-		return fmt.Sprintf("%s(%s)", n.Kind.String(), strings.Join(n.GetPropertiesValues(false), ", "))
-	} else {
-		return n.Kind.String()
+	str := n.Kind.String()
+
+	if n.Properties != nil {
+		str += fmt.Sprintf("(%s)", strings.Join(n.GetPropertiesValues(false), ", "))
+	} else if n.Value != "" {
+		str += fmt.Sprintf("(%s)", n.Value)
 	}
+
+	return str
 }
 
 func (n *Node) Print(identation int) {
@@ -48,8 +50,19 @@ func (n *Node) Print(identation int) {
 	}
 }
 
-func (n *Node) AddChild(child *Node) {
-	n.Children = append(n.Children, child)
+func (n *Node) AddValue(value string) *Node {
+	n.Value = value
+	return n
+}
+
+func (n *Node) AddChildren(children ...*Node) *Node {
+	n.Children = append(n.Children, children...)
+	return n
+}
+
+func (n *Node) AddProperties(properties ...*Node) *Node {
+	n.Properties = append(n.Properties, properties...)
+	return n
 }
 
 func (n *Node) GetPropertiesValues(codegen bool) (values []string) {

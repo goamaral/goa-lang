@@ -1,9 +1,11 @@
-- Implement my own parser
-- Remove yacc and implement flat package
+- Implement flat package
 - Reimplement lexer with https://pkg.go.dev/text/scanner
 - Recover from errors
-- Fix line number and column number in syntax error
+- Add line number and column number in errors
 - bool variable declaration
+- Remove lex and ast flags
+- Add until=\<step=lexer, ast, codegen, codegen\> flag
+- Add debug-lexer, debug-ast, debug-ast-verbose, debug-codegen
 
 - Compile go code to binary
 - Parse -run to run precompiled code

@@ -27,7 +27,7 @@ var regexPriorityList = []*regexp.Regexp{
 /* STRUCT */
 type Lexer struct {
 	sourceCode   string
-	Tokens       []token
+	Tokens       []Token
 	LineNumber   int
 	ColumnNumber int
 }
@@ -82,7 +82,7 @@ func (l *Lexer) extractTokens(chunk string) {
 // Extract token from chunk
 type extractTokenMatch struct {
 	score int
-	token token
+	token Token
 }
 
 func (l *Lexer) extractToken(chunk string) string {
@@ -95,7 +95,7 @@ func (l *Lexer) extractToken(chunk string) string {
 		loc := rgx.FindStringIndex(chunk)
 
 		if loc != nil && loc[0] == 0 {
-			matches = append(matches, extractTokenMatch{score: loc[1], token: token{Kind: regex_KindMap[rgx], Value: chunk[loc[0]:loc[1]]}})
+			matches = append(matches, extractTokenMatch{score: loc[1], token: Token{Kind: regex_KindMap[rgx], Value: chunk[loc[0]:loc[1]]}})
 		}
 	}
 

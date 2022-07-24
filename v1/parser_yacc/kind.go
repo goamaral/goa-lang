@@ -2,7 +2,8 @@ package parser_yacc
 
 /* CONSTANTS */
 const (
-	DEF Kind = iota
+	UNKNOWN Kind = iota
+	DEF
 	DO
 	END
 	RPAR
@@ -19,6 +20,7 @@ const (
 )
 
 var kind_nameMap = map[Kind]string{
+	UNKNOWN:  "UNKNOWN",
 	DEF:      "DEF",
 	DO:       "DO",
 	END:      "END",

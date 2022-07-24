@@ -7,7 +7,8 @@ import (
 	"os"
 
 	"github.com/Goamaral/goa-lang/v1/codegen"
-	parser "github.com/Goamaral/goa-lang/v1/parser_yacc"
+	"github.com/Goamaral/goa-lang/v1/parser"
+	"github.com/Goamaral/goa-lang/v1/parser_yacc"
 )
 
 func main() {
@@ -34,7 +35,7 @@ func main() {
 	}
 
 	// Lexing
-	lexer := parser.NewLexer(string(sourceCodeBytes))
+	lexer := parser_yacc.NewLexer(string(sourceCodeBytes))
 	lexer.Parse()
 	if inDebugMode {
 		lexer.Print()
@@ -44,8 +45,8 @@ func main() {
 	}
 
 	// Building syntax tree
-	syntaxTree, ok := parser.BuildAst(parser.NewYaccLexer(lexer), inDebugMode)
-	if inDebugMode {
+	syntaxTree, ok := parser.BuildAst(parser_yacc.NewYaccLexer(lexer), inDebugMode)
+	if inDebugMode && ok {
 		syntaxTree.Print()
 	}
 	if !ok || stopAtAst {

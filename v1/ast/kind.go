@@ -17,11 +17,19 @@ const (
 )
 
 var kind_nameMap = map[Kind]string{
+	// NON TERMINALS
 	Package:      "PACKAGE",
 	FuncDef:      "FUNC_DEF",
 	FuncDefBody:  "FUNC_DEF_BODY",
 	GoaFuncCall:  "GOA_FUNC_CALL",
 	FuncCallArgs: "FUNC_CALL_ARGS",
+
+	// TERMINALS
+	Id:      "ID",
+	Boolean: "BOOLEAN",
+	String:  "STRING",
+	Integer: "INTEGER",
+	Nil:     "NIL",
 }
 
 type Kind int

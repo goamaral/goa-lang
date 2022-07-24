@@ -48,13 +48,13 @@ var kind_ShouldDisplayValueMap = map[Kind]bool{
 }
 
 /* STRUCT */
-type token struct {
+type Token struct {
 	Kind  Kind
 	Value string
 }
 
 /* METHODS */
-func (t *token) String() string {
+func (t *Token) String() string {
 	if kind_ShouldDisplayValueMap[t.Kind] {
 		return fmt.Sprintf("%s(%s)", t.Kind.String(), t.Value)
 	} else {
