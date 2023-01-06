@@ -65,7 +65,7 @@ func BuildAst(lexer YaccLexer, inDebugMode bool) (*ast.Ast, bool) {
 	return &ast.Ast{Package: pkg}, true
 }
 
-// SYNTAX: FuncDef
+// Package: FuncDef
 func (p *parser) BuildPackage() *ast.Node {
 	// FuncDef
 	funcDef := p.BuildFuncDef()
@@ -77,12 +77,12 @@ func (p *parser) BuildPackage() *ast.Node {
 	return ast.NewNode(ast.Package).AddChildren(funcDef)
 }
 
-// SYNTAX: DEF Id FuncDefBody
+// FuncDef: DEF Id Block
 func (p *parser) BuildFuncDef() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
 
-	var id, funcDefBody *ast.Node
+	var id, block *ast.Node
 	var ok bool
 
 	// DEF
@@ -97,17 +97,17 @@ func (p *parser) BuildFuncDef() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	// FuncDefBody
-	funcDefBody = p.BuildFuncDefBody()
-	if funcDefBody == nil {
+	// Block
+	block = p.BuildBlock()
+	if block == nil {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built FuncDef(%s)", id.Value)
-	return ast.NewNode(ast.FuncDef).AddProperties(id).AddChildren(funcDefBody)
+	p.Log("Built FuncDef[%s]", id.Value)
+	return ast.NewNode(ast.FuncDef).AddValue(id.Value).AddChildren(block)
 }
 
-// SYNTAX: UPPER_ID | LOWER_ID
+// Id: UPPER_ID | LOWER_ID
 func (p *parser) BuildId() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
@@ -125,8 +125,8 @@ func (p *parser) BuildId() *ast.Node {
 	return ast.NewNode(ast.Id).AddValue(tk.Value)
 }
 
-// SYNTAX: DO StmtList END
-func (p *parser) BuildFuncDefBody() *ast.Node {
+// Block: DO StmtList END
+func (p *parser) BuildBlock() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
 
@@ -136,7 +136,7 @@ func (p *parser) BuildFuncDefBody() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	// StmtList
+	// StmtList: Stmt StmtList | Empty
 	var stmtList []*ast.Node
 	for {
 		stmt := p.BuildStmt()
@@ -152,22 +152,29 @@ func (p *parser) BuildFuncDefBody() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built FuncDefBody")
-	return ast.NewNode(ast.FuncDefBody).AddChildren(stmtList...)
+	p.Log("Built Block")
+	return ast.NewNode(ast.Block).AddChildren(stmtList...)
 }
 
-// SYNTAX: FuncCall
+// Stmt: FuncCall | VarDecl
 func (p *parser) BuildStmt() *ast.Node {
-	// FuncCall
+	var ctx parserContext
+	defer p.Cleanup(ctx)
+
 	funcCall := p.BuildFuncCall()
 	if funcCall != nil {
 		return funcCall
 	}
 
+	varDecl := p.BuildVarDecl()
+	if varDecl != nil {
+		return varDecl
+	}
+
 	return nil
 }
 
-// SYNTAX: GoaFuncCall
+// FuncCall: GoaFuncCall
 func (p *parser) BuildFuncCall() *ast.Node {
 	// GoaFuncCall
 	goaFuncCall := p.BuildGoaFuncCall()
@@ -178,7 +185,7 @@ func (p *parser) BuildFuncCall() *ast.Node {
 	return nil
 }
 
-// SYNTAX: HASH UPPER_ID LPAR FuncCallArgList RPAR
+// GoaFuncCall: HASH UPPER_ID LPAR FuncCallArgList RPAR
 func (p *parser) BuildGoaFuncCall() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
@@ -216,12 +223,10 @@ func (p *parser) BuildGoaFuncCall() *ast.Node {
 	}
 
 	p.Log("Built GoaFuncCall(%s)", upperId.Value)
-	return ast.NewNode(ast.GoaFuncCall).
-		AddProperties(ast.NewNode(ast.Id).AddValue(upperId.Value)).
-		AddChildren(funcCallArgList)
+	return ast.NewNode(ast.GoaFuncCall).AddValue(upperId.Value).AddChildren(funcCallArgList)
 }
 
-// SYNTAX: FuncCallArg | FuncCallArg COMMA FuncCallArgList | Empty
+// FuncCallArgList: FuncCallArg | FuncCallArg COMMA FuncCallArgList | Empty
 func (p *parser) BuildFuncCallArgList() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
@@ -242,10 +247,10 @@ func (p *parser) BuildFuncCallArgList() *ast.Node {
 	}
 
 	p.Log("Built FuncCallArgList")
-	return ast.NewNode(ast.FuncCallArgs).AddProperties(funcCallArgList...)
+	return ast.NewNode(ast.FuncCallArgs).AddChildren(funcCallArgList...)
 }
 
-// SYNTAX: Terminal
+// FuncCallArg: Terminal
 func (p *parser) BuildFuncCallArg() *ast.Node {
 	// Terminal
 	terminal := p.BuildTerminal()
@@ -256,7 +261,26 @@ func (p *parser) BuildFuncCallArg() *ast.Node {
 	return nil
 }
 
-// SYNTAX: UntypedConstant | Id
+// VarDecl: BOOL Id
+func (p *parser) BuildVarDecl() *ast.Node {
+	var ctx parserContext
+	defer p.Cleanup(ctx)
+
+	datatypeTk, ok := p.Pop(ctx, token.BOOL)
+	if !ok {
+		return p.UndoPops(ctx)
+	}
+
+	id := p.BuildId()
+	if id == nil {
+		return p.UndoPops(ctx)
+	}
+
+	p.Log("Built VarDecl(%s) - %s", id.Value, datatypeTk.Kind.String())
+	return ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatypeTk.Kind)
+}
+
+// Terminal: UntypedConstant | Id
 func (p *parser) BuildTerminal() *ast.Node {
 	var terminal *ast.Node
 
@@ -275,7 +299,7 @@ func (p *parser) BuildTerminal() *ast.Node {
 	return nil
 }
 
-// SYNTAX: Boolean | STRING | INTEGER | NIL
+// UntypedConstant: Boolean | STRING_LIT | INTEGER_LIT | NIL
 func (p *parser) BuildUntypedConstant() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
@@ -286,17 +310,17 @@ func (p *parser) BuildUntypedConstant() *ast.Node {
 		return boolean
 	}
 
-	// STRING | INTEGER | NIL
-	tk, ok := p.Pop(ctx, token.STRING, token.INTEGER, token.NIL)
+	// STRING_LIT | INTEGER_LIT | NIL
+	tk, ok := p.Pop(ctx, token.STRING_LIT, token.INTEGER_LIT, token.NIL)
 	if !ok {
 		return p.UndoPops(ctx)
 	}
 
 	var kind ast.Kind
 	switch tk.Kind {
-	case token.STRING:
+	case token.STRING_LIT:
 		kind = ast.String
-	case token.INTEGER:
+	case token.INTEGER_LIT:
 		kind = ast.Integer
 	case token.NIL:
 		kind = ast.Nil
@@ -308,7 +332,7 @@ func (p *parser) BuildUntypedConstant() *ast.Node {
 	return ast.NewNode(kind).AddValue(tk.Value)
 }
 
-// SYNTAX: TRUE | FALSE
+// Boolean: TRUE | FALSE
 func (p *parser) BuildBoolean() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)

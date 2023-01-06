@@ -30,26 +30,37 @@ func (cg *codeGenerator) WriteIdentation() {
 	}
 }
 
-func (cg *codeGenerator) ProcessChildren(n *ast.Node) {
-	for _, childNode := range n.Children {
+func (cg *codeGenerator) ProcessChildren(n *ast.Node, seperator string) {
+	for i, childNode := range n.Children {
 		cg.ProcessNode(childNode)
+
+		if i != len(n.Children)-1 {
+			fmt.Fprint(cg.writer, seperator)
+		}
 	}
 }
 
 func (cg *codeGenerator) ProcessNode(n *ast.Node) {
+	if n.IsTerminal() {
+		fmt.Fprintf(cg.writer, n.Value)
+		return
+	}
+
 	switch n.Kind {
 	case ast.Package:
 		cg.ProcessPackage(n)
 	case ast.FuncDef:
 		cg.ProcessFuncDef(n)
-	case ast.FuncDefBody:
-		cg.ProcessFuncDefBody(n)
+	case ast.Block:
+		cg.ProcessBlock(n)
 	case ast.GoaFuncCall:
 		cg.ProcessGoaFuncCall(n)
 	case ast.FuncCallArgs:
 		cg.ProcessFuncCallArgs(n)
+	case ast.VarDecl:
+		cg.ProcessVarDecl(n)
 	default:
-		panic(fmt.Sprintf("Don't knwo how to process node of kind %s", n.Kind.String()))
+		panic(fmt.Sprintf("%s code generation not supported", n.Kind.String()))
 	}
 }
 
@@ -61,35 +72,43 @@ func (cg *codeGenerator) ProcessAst(syntaxTree *ast.Ast) {
 func (cg *codeGenerator) ProcessPackage(pkg *ast.Node) {
 	cg.WriteIdentation()
 	cg.writer.WriteString("package main\n\n")
-	cg.ProcessChildren(pkg)
+	cg.ProcessChildren(pkg, "")
 }
 
 func (cg *codeGenerator) ProcessFuncDef(funcDef *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprintf(cg.writer, "func %s() ", funcDef.Properties[0].Value)
-	cg.ProcessChildren(funcDef)
+	fmt.Fprintf(cg.writer, "func %s() ", funcDef.Value)
+	cg.ProcessChildren(funcDef, "")
 }
 
-func (cg *codeGenerator) ProcessFuncDefBody(funcDefBody *ast.Node) {
+func (cg *codeGenerator) ProcessBlock(block *ast.Node) {
 	cg.WriteIdentation()
 	fmt.Fprint(cg.writer, "{\n")
 	cg.identation++
-	cg.ProcessChildren(funcDefBody)
+	cg.ProcessChildren(block, "")
 	cg.identation--
 	fmt.Fprint(cg.writer, "}\n")
 }
 
 func (cg *codeGenerator) ProcessGoaFuncCall(goaFuncCall *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprint(cg.writer, strings.ToLower(goaFuncCall.Properties[0].Value))
+	fmt.Fprint(cg.writer, strings.ToLower(goaFuncCall.Value))
 	oldIdentation := cg.identation
 	cg.identation = 0
-	cg.ProcessChildren(goaFuncCall)
+	cg.ProcessChildren(goaFuncCall, "")
 	cg.identation = oldIdentation
 	cg.writer.WriteByte('\n')
 }
 
 func (cg *codeGenerator) ProcessFuncCallArgs(funcCallArgs *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprintf(cg.writer, "(%s)", strings.Join(funcCallArgs.GetPropertiesValues(), ", "))
+	fmt.Fprint(cg.writer, "(")
+	cg.ProcessChildren(funcCallArgs, ", ")
+	fmt.Fprint(cg.writer, ")")
+}
+
+func (cg *codeGenerator) ProcessVarDecl(varDecl *ast.Node) {
+	cg.WriteIdentation()
+	fmt.Fprintf(cg.writer, "var %s %s", varDecl.Value, strings.ToLower(varDecl.DataType.String()))
+	cg.writer.WriteByte('\n')
 }

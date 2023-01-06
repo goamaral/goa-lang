@@ -3,13 +3,16 @@ package ast
 import (
 	"fmt"
 	"strings"
+
+	"github.com/Goamaral/goa-lang/v1/internal/token"
+	"golang.org/x/exp/slices"
 )
 
 type Node struct {
-	Kind       Kind
-	Properties []*Node
-	Children   []*Node
-	Value      string
+	Kind     Kind
+	Value    string
+	DataType token.Kind
+	Children []*Node
 }
 
 func NewNode(kind Kind) *Node {
@@ -17,15 +20,18 @@ func NewNode(kind Kind) *Node {
 }
 
 func (n *Node) String() string {
-	str := n.Kind.String()
+	var sb strings.Builder
+	sb.WriteString(n.Kind.String())
 
-	if n.Properties != nil {
-		str += fmt.Sprintf("(%s)", strings.Join(n.GetPropertiesValues(), ", "))
-	} else if n.Value != "" {
-		str += fmt.Sprintf("(%s)", n.Value)
+	if n.Value != "" {
+		sb.WriteString(fmt.Sprintf("(%s)", n.Value))
 	}
 
-	return str
+	if n.DataType != token.UNKNOWN {
+		sb.WriteString(fmt.Sprintf(" -> %s", n.DataType.String()))
+	}
+
+	return sb.String()
 }
 
 func (n *Node) Print(identation int) {
@@ -46,20 +52,16 @@ func (n *Node) AddValue(value string) *Node {
 	return n
 }
 
+func (n *Node) AddDataType(dataType token.Kind) *Node {
+	n.DataType = dataType
+	return n
+}
+
 func (n *Node) AddChildren(children ...*Node) *Node {
 	n.Children = append(n.Children, children...)
 	return n
 }
 
-func (n *Node) AddProperties(properties ...*Node) *Node {
-	n.Properties = append(n.Properties, properties...)
-	return n
-}
-
-func (n *Node) GetPropertiesValues() (values []string) {
-	for _, property := range n.Properties {
-		values = append(values, property.Value)
-	}
-
-	return values
+func (n *Node) IsTerminal() bool {
+	return slices.Contains(terminalKinds, n.Kind)
 }

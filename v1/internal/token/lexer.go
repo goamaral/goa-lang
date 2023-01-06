@@ -8,20 +8,30 @@ import (
 
 /* CONSTANTS */
 var regexPriorityList = []*regexp.Regexp{
+	// Keywords
 	defRegex,
 	doRegex,
 	endRegex,
+
+	// Symbols
 	lparRegex,
 	rparRegex,
 	hashRegex,
 	commaRegex,
+
+	// Datatypes
+	boolRegex,
+
+	// Untyped constants
 	trueRegex,
 	falseRegex,
+	stringLiteralRegex,
+	integerLiteralRegex,
 	nilRegex,
-	integerRegex,
+
+	// Id
 	upperIdRegex,
 	lowerIdRegex,
-	stringRegex,
 }
 
 /* STRUCT */

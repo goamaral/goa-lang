@@ -36,16 +36,17 @@ def run_test(test_path, test_name):
   output_test_passed = str(result_output, 'utf-8') == expected_output
   test_passed = precompiled_test_passed and output_test_passed
 
+  test_result_message = ""
   if not test_passed:
-    test_result_message = "FAILURE"
+    test_state = "FAILURE"
     if not precompiled_test_passed:
       test_result_message += "\n  Invalid precompiled code\n    Expected:\n%s\n    Got:\n%s" % (expected_precompiled, result_precompiled)
     if not output_test_passed:
       test_result_message += "\n  Invalid output\n    Expected:\n%s\n    Got:\n%s" % (expected_output, str(result_output, 'utf-8'))
   else:
-    test_result_message = "SUCCESS"
+    test_state = "SUCCESS"
   
-  print("[%s] %s" % (test_result_message, test_name))
+  print("[%s] %s %s" % (test_state, test_name, test_result_message))
 
 if __name__ == "__main__":
   run_folder_tests(tests_path)

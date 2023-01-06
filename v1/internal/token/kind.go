@@ -3,38 +3,60 @@ package token
 /* CONSTANTS */
 const (
 	UNKNOWN Kind = iota
+
+	// Keywords
 	DEF
 	DO
 	END
+
+	// Symbols
 	RPAR
 	LPAR
 	HASH
 	COMMA
+
+	// Datatypes
+	BOOL
+
+	// Untyped constants
 	TRUE
 	FALSE
-	INTEGER
+	INTEGER_LIT
+	STRING_LIT
+	NIL
+
+	// Id
 	UPPER_ID
 	LOWER_ID
-	STRING
-	NIL
 )
 
 var kind_nameMap = map[Kind]string{
-	UNKNOWN:  "UNKNOWN",
-	DEF:      "DEF",
-	DO:       "DO",
-	END:      "END",
-	RPAR:     "RPAR",
-	LPAR:     "LPAR",
-	HASH:     "HASH",
-	COMMA:    "COMMA",
-	TRUE:     "TRUE",
-	FALSE:    "FALSE",
-	INTEGER:  "INTEGER",
+	UNKNOWN: "UNKNOWN",
+
+	// Keywords
+	DEF: "DEF",
+	DO:  "DO",
+	END: "END",
+
+	// Symbols
+	RPAR:  "RPAR",
+	LPAR:  "LPAR",
+	HASH:  "HASH",
+	COMMA: "COMMA",
+
+	// Datatypes
+	BOOL: "BOOL",
+
+	// Untyped constants
+	TRUE:        "TRUE",
+	FALSE:       "FALSE",
+	INTEGER_LIT: "INTEGER_LIT",
+	STRING_LIT:  "STRING_LIT",
+	NIL:         "NIL",
+
+	// Id
 	UPPER_ID: "UPPER_ID",
 	LOWER_ID: "LOWER_ID",
-	STRING:   "STRING",
-	NIL:      "NIL",
 }
 
 /* STRUCT */

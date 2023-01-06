@@ -2,4 +2,6 @@ def main do
   #Println(true, false)
   #Println(1, -1)
   #Println("string", "string2\n", "string3")
+  bool boolVar
+  #Println(boolVar)
 end

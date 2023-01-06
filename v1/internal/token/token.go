@@ -7,44 +7,64 @@ import (
 
 /* CONSTANTS */
 var (
-	defRegex     *regexp.Regexp = regexp.MustCompile(`def`)
-	doRegex                     = regexp.MustCompile(`do`)
-	endRegex                    = regexp.MustCompile(`end`)
-	lparRegex                   = regexp.MustCompile(`\(`)
-	rparRegex                   = regexp.MustCompile(`\)`)
-	hashRegex                   = regexp.MustCompile(`#`)
-	commaRegex                  = regexp.MustCompile(`,`)
-	trueRegex                   = regexp.MustCompile(`true`)
-	falseRegex                  = regexp.MustCompile(`false`)
-	nilRegex                    = regexp.MustCompile(`nil`)
-	integerRegex                = regexp.MustCompile(`-?\d+`)
-	upperIdRegex                = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
-	lowerIdRegex                = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
-	stringRegex                 = regexp.MustCompile(`\"[^\"]*\"`)
+	// Keywords
+	defRegex *regexp.Regexp = regexp.MustCompile(`def`)
+	doRegex                 = regexp.MustCompile(`do`)
+	endRegex                = regexp.MustCompile(`end`)
+
+	// Symbols
+	lparRegex  = regexp.MustCompile(`\(`)
+	rparRegex  = regexp.MustCompile(`\)`)
+	hashRegex  = regexp.MustCompile(`#`)
+	commaRegex = regexp.MustCompile(`,`)
+
+	// Datatypes
+	boolRegex = regexp.MustCompile(`bool`)
+
+	// Untyped constants
+	trueRegex           = regexp.MustCompile(`true`)
+	falseRegex          = regexp.MustCompile(`false`)
+	stringLiteralRegex  = regexp.MustCompile(`\"[^\"]*\"`)
+	integerLiteralRegex = regexp.MustCompile(`-?\d+`)
+	nilRegex            = regexp.MustCompile(`nil`)
+
+	// Id
+	upperIdRegex = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
+	lowerIdRegex = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
 )
 
 var regex_KindMap = map[*regexp.Regexp]Kind{
-	defRegex:     DEF,
-	doRegex:      DO,
-	endRegex:     END,
-	lparRegex:    LPAR,
-	rparRegex:    RPAR,
-	hashRegex:    HASH,
-	commaRegex:   COMMA,
-	trueRegex:    TRUE,
-	falseRegex:   FALSE,
-	nilRegex:     NIL,
-	integerRegex: INTEGER,
+	// Keywords
+	defRegex: DEF,
+	doRegex:  DO,
+	endRegex: END,
+
+	// Symbols
+	lparRegex:  LPAR,
+	rparRegex:  RPAR,
+	hashRegex:  HASH,
+	commaRegex: COMMA,
+
+	// Datatypes
+	boolRegex: BOOL,
+
+	// Untyped constants
+	trueRegex:           TRUE,
+	falseRegex:          FALSE,
+	integerLiteralRegex: INTEGER_LIT,
+	stringLiteralRegex:  STRING_LIT,
+	nilRegex:            NIL,
+
+	// Id
 	upperIdRegex: UPPER_ID,
 	lowerIdRegex: LOWER_ID,
-	stringRegex:  STRING,
 }
 
 var kind_ShouldDisplayValueMap = map[Kind]bool{
-	INTEGER:  true,
-	UPPER_ID: true,
-	LOWER_ID: true,
-	STRING:   true,
+	INTEGER_LIT: true,
+	STRING_LIT:  true,
+	UPPER_ID:    true,
+	LOWER_ID:    true,
 }
 
 /* STRUCT */
