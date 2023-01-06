@@ -261,23 +261,34 @@ func (p *parser) BuildFuncCallArg() *ast.Node {
 	return nil
 }
 
-// VarDecl: BOOL Id
+// VarDecl: DataType Id
 func (p *parser) BuildVarDecl() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
-
-	datatypeTk, ok := p.Pop(ctx, token.BOOL)
-	if !ok {
-		return p.UndoPops(ctx)
+	datatypeTkKind := p.BuildDataType()
+	if datatypeTkKind == token.UNKNOWN {
+		return nil
 	}
 
 	id := p.BuildId()
 	if id == nil {
-		return p.UndoPops(ctx)
+		return nil
 	}
 
-	p.Log("Built VarDecl(%s) - %s", id.Value, datatypeTk.Kind.String())
-	return ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatypeTk.Kind)
+	p.Log("Built VarDecl(%s) - %s", id.Value, datatypeTkKind.String())
+	return ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatypeTkKind)
+}
+
+// DataType: BOOL_PTR | BOOL
+func (p *parser) BuildDataType() token.Kind {
+	var ctx parserContext
+	defer p.Cleanup(ctx)
+
+	datatypeTk, ok := p.Pop(ctx, token.BOOL_PTR, token.BOOL)
+	if !ok {
+		p.UndoPops(ctx)
+		return token.UNKNOWN
+	}
+
+	return datatypeTk.Kind
 }
 
 // Terminal: UntypedConstant | Id

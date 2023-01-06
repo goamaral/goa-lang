@@ -4,4 +4,6 @@ def main do
   #Println("string", "string2\n", "string3")
   bool boolVar
   #Println(boolVar)
+  bool* boolPtrVar
+  #Println(boolPtrVar)
 end

@@ -1,4 +1,6 @@
 def main do
   bool boolVar
   #Println(boolVar)
+  bool* boolPtrVar
+  #Println(boolPtrVar)
 end

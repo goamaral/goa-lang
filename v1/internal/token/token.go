@@ -19,7 +19,8 @@ var (
 	commaRegex = regexp.MustCompile(`,`)
 
 	// Datatypes
-	boolRegex = regexp.MustCompile(`bool`)
+	boolPtrRegex = regexp.MustCompile(`bool\*`)
+	boolRegex    = regexp.MustCompile(`bool`)
 
 	// Untyped constants
 	trueRegex           = regexp.MustCompile(`true`)
@@ -46,7 +47,8 @@ var regex_KindMap = map[*regexp.Regexp]Kind{
 	commaRegex: COMMA,
 
 	// Datatypes
-	boolRegex: BOOL,
+	boolPtrRegex: BOOL_PTR,
+	boolRegex:    BOOL,
 
 	// Untyped constants
 	trueRegex:           TRUE,

@@ -17,12 +17,12 @@ Bringing syntax sugar to improve development speed.
       - [X] Integer unsigned (1)
       - [X] Integer signed(-1)
     - [X] Nil
-      - [] Needs pointer datatype declaration with assignment to be tested
+      - [] Needs pointer variable declaration with assignment to be tested
 - Universe block
   - [ ] variable declaration
-    - [ ] bool
-      - [ ] bool
-      - [ ] *bool
+    - [X] bool
+      - [X] bool
+      - [X] *bool
     - [ ] string
       - [ ] string
       - [ ] *string

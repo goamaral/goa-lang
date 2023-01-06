@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Goamaral/goa-lang/v1/internal/ast"
+	"github.com/Goamaral/goa-lang/v1/internal/token"
 )
 
 type codeGenerator struct {
@@ -16,11 +17,9 @@ type codeGenerator struct {
 
 func GenerateCode(syntaxTree *ast.Ast, outputFile *os.File) {
 	cg := codeGenerator{writer: bufio.NewWriter(outputFile)}
-
 	if outputFile == os.Stdout {
 		cg.writer.WriteString("===== CODEGEN =====\n")
 	}
-
 	cg.ProcessAst(syntaxTree)
 }
 
@@ -30,19 +29,29 @@ func (cg *codeGenerator) WriteIdentation() {
 	}
 }
 
+func (cg *codeGenerator) ProcessDatatype(dataType token.Kind) {
+	switch dataType {
+	case token.BOOL_PTR:
+		cg.writer.WriteString("*bool")
+	case token.BOOL:
+		cg.writer.WriteString("bool")
+	default:
+		panic(fmt.Sprintf("Data type %s not supported", dataType.String()))
+	}
+}
+
 func (cg *codeGenerator) ProcessChildren(n *ast.Node, seperator string) {
 	for i, childNode := range n.Children {
 		cg.ProcessNode(childNode)
-
 		if i != len(n.Children)-1 {
-			fmt.Fprint(cg.writer, seperator)
+			cg.writer.WriteString(seperator)
 		}
 	}
 }
 
 func (cg *codeGenerator) ProcessNode(n *ast.Node) {
 	if n.IsTerminal() {
-		fmt.Fprintf(cg.writer, n.Value)
+		cg.writer.WriteString(n.Value)
 		return
 	}
 
@@ -60,7 +69,7 @@ func (cg *codeGenerator) ProcessNode(n *ast.Node) {
 	case ast.VarDecl:
 		cg.ProcessVarDecl(n)
 	default:
-		panic(fmt.Sprintf("%s code generation not supported", n.Kind.String()))
+		panic(fmt.Sprintf("Node %s not supported", n.Kind.String()))
 	}
 }
 
@@ -83,16 +92,16 @@ func (cg *codeGenerator) ProcessFuncDef(funcDef *ast.Node) {
 
 func (cg *codeGenerator) ProcessBlock(block *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprint(cg.writer, "{\n")
+	cg.writer.WriteString("{\n")
 	cg.identation++
 	cg.ProcessChildren(block, "")
 	cg.identation--
-	fmt.Fprint(cg.writer, "}\n")
+	cg.writer.WriteString("}\n")
 }
 
 func (cg *codeGenerator) ProcessGoaFuncCall(goaFuncCall *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprint(cg.writer, strings.ToLower(goaFuncCall.Value))
+	cg.writer.WriteString(strings.ToLower(goaFuncCall.Value))
 	oldIdentation := cg.identation
 	cg.identation = 0
 	cg.ProcessChildren(goaFuncCall, "")
@@ -102,13 +111,14 @@ func (cg *codeGenerator) ProcessGoaFuncCall(goaFuncCall *ast.Node) {
 
 func (cg *codeGenerator) ProcessFuncCallArgs(funcCallArgs *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprint(cg.writer, "(")
+	cg.writer.WriteByte('(')
 	cg.ProcessChildren(funcCallArgs, ", ")
-	fmt.Fprint(cg.writer, ")")
+	cg.writer.WriteByte(')')
 }
 
 func (cg *codeGenerator) ProcessVarDecl(varDecl *ast.Node) {
 	cg.WriteIdentation()
-	fmt.Fprintf(cg.writer, "var %s %s", varDecl.Value, strings.ToLower(varDecl.DataType.String()))
+	fmt.Fprintf(cg.writer, "var %s ", varDecl.Value)
+	cg.ProcessDatatype(varDecl.DataType)
 	cg.writer.WriteByte('\n')
 }

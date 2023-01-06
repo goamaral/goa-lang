@@ -20,6 +20,7 @@ var regexPriorityList = []*regexp.Regexp{
 	commaRegex,
 
 	// Datatypes
+	boolPtrRegex,
 	boolRegex,
 
 	// Untyped constants
