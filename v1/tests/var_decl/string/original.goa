@@ -1,0 +1,6 @@
+def main do
+  string stringVar
+  #Println(stringVar)
+  string* stringPtrVar
+  #Println(stringPtrVar)
+end

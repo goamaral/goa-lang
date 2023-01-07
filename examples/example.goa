@@ -6,4 +6,8 @@ def main do
   #Println(boolVar)
   bool* boolPtrVar
   #Println(boolPtrVar)
+  string stringVar
+  #Println(stringVar)
+  string* stringVarPtr
+  #Println(stringVarPtr)
 end

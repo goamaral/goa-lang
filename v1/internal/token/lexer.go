@@ -22,6 +22,8 @@ var regexPriorityList = []*regexp.Regexp{
 	// Datatypes
 	boolPtrRegex,
 	boolRegex,
+	stringPtrRegex,
+	stringRegex,
 
 	// Untyped constants
 	trueRegex,

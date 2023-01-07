@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Goamaral/goa-lang/v1/internal/token"
 	"golang.org/x/exp/slices"
+
+	"github.com/Goamaral/goa-lang/v1/internal/token"
 )
 
 type Node struct {
 	Kind     Kind
 	Value    string
-	DataType token.Kind
+	DataType *Node
+
 	Children []*Node
+	Token    token.Token
 }
 
 func NewNode(kind Kind) *Node {
@@ -20,6 +23,10 @@ func NewNode(kind Kind) *Node {
 }
 
 func (n *Node) String() string {
+	if n.Kind == DataType {
+		return n.Token.String()
+	}
+
 	var sb strings.Builder
 	sb.WriteString(n.Kind.String())
 
@@ -27,8 +34,8 @@ func (n *Node) String() string {
 		sb.WriteString(fmt.Sprintf("(%s)", n.Value))
 	}
 
-	if n.DataType != token.UNKNOWN {
-		sb.WriteString(fmt.Sprintf(" -> %s", n.DataType.String()))
+	if n.DataType != nil {
+		sb.WriteString(fmt.Sprintf("[%s]", n.DataType.String()))
 	}
 
 	return sb.String()
@@ -52,13 +59,18 @@ func (n *Node) AddValue(value string) *Node {
 	return n
 }
 
-func (n *Node) AddDataType(dataType token.Kind) *Node {
+func (n *Node) AddDataType(dataType *Node) *Node {
 	n.DataType = dataType
 	return n
 }
 
 func (n *Node) AddChildren(children ...*Node) *Node {
 	n.Children = append(n.Children, children...)
+	return n
+}
+
+func (n *Node) AddToken(tk token.Token) *Node {
+	n.Token = tk
 	return n
 }
 

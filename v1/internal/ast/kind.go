@@ -15,6 +15,7 @@ const (
 	String
 	Integer
 	Nil
+	DataType
 )
 
 var kind_nameMap = map[Kind]string{
@@ -27,14 +28,15 @@ var kind_nameMap = map[Kind]string{
 	VarDecl:      "VAR_DECL",
 
 	// TERMINALS
-	Id:      "ID",
-	Boolean: "BOOLEAN",
-	String:  "STRING",
-	Integer: "INTEGER",
-	Nil:     "NIL",
+	Id:       "ID",
+	Boolean:  "BOOLEAN",
+	String:   "STRING",
+	Integer:  "INTEGER",
+	Nil:      "NIL",
+	DataType: "DATA_TYPE",
 }
 
-var terminalKinds = []Kind{Id, Boolean, String, Integer, Nil}
+var terminalKinds = []Kind{Id, Boolean, String, Integer, Nil, DataType}
 
 type Kind int
 

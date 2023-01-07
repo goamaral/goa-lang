@@ -19,8 +19,10 @@ var (
 	commaRegex = regexp.MustCompile(`,`)
 
 	// Datatypes
-	boolPtrRegex = regexp.MustCompile(`bool\*`)
-	boolRegex    = regexp.MustCompile(`bool`)
+	boolPtrRegex   = regexp.MustCompile(`bool\*`)
+	boolRegex      = regexp.MustCompile(`bool`)
+	stringPtrRegex = regexp.MustCompile(`string\*`)
+	stringRegex    = regexp.MustCompile(`string`)
 
 	// Untyped constants
 	trueRegex           = regexp.MustCompile(`true`)
@@ -47,8 +49,10 @@ var regex_KindMap = map[*regexp.Regexp]Kind{
 	commaRegex: COMMA,
 
 	// Datatypes
-	boolPtrRegex: BOOL_PTR,
-	boolRegex:    BOOL,
+	boolPtrRegex:   BOOL_PTR,
+	boolRegex:      BOOL,
+	stringPtrRegex: STRING_PTR,
+	stringRegex:    STRING,
 
 	// Untyped constants
 	trueRegex:           TRUE,

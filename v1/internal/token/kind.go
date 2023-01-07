@@ -18,6 +18,8 @@ const (
 	// Datatypes
 	BOOL_PTR
 	BOOL
+	STRING_PTR
+	STRING
 
 	// Untyped constants
 	TRUE
@@ -46,8 +48,10 @@ var kind_nameMap = map[Kind]string{
 	COMMA: "COMMA",
 
 	// Datatypes
-	BOOL_PTR: "BOOL_PTR",
-	BOOL:     "BOOL",
+	BOOL_PTR:   "BOOL_PTR",
+	BOOL:       "BOOL",
+	STRING_PTR: "STRING_PTR",
+	STRING:     "STRING",
 
 	// Untyped constants
 	TRUE:        "TRUE",

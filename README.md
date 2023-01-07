@@ -23,9 +23,9 @@ Bringing syntax sugar to improve development speed.
     - [X] bool
       - [X] bool
       - [X] *bool
-    - [ ] string
-      - [ ] string
-      - [ ] *string
+    - [X] string
+      - [X] string
+      - [X] *string
     - [ ] int
       - [ ] int
       - [ ] *int

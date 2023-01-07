@@ -1,11 +1,10 @@
 - Implement var declarations
-- Reimplement lexer with https://pkg.go.dev/text/scanner
+- Return errors if all tokens were not consumed
 - Recover from errors
 - Add line number and column number in errors
-- bool variable declaration
-- Remove lex and ast flags
-- Add until=\<step=lexer, ast, codegen, codegen\> flag
+- Replace lex, ast, codegen flags with until=\<step=lexer, ast, codegen, codegen\> flag
 - Add debug-lexer, debug-ast, debug-ast-verbose, debug-codegen
+- Reimplement lexer with https://pkg.go.dev/text/scanner
 
 - Compile go code to binary
 - Parse -run to run precompiled code

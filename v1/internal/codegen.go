@@ -29,12 +29,16 @@ func (cg *codeGenerator) WriteIdentation() {
 	}
 }
 
-func (cg *codeGenerator) ProcessDatatype(dataType token.Kind) {
-	switch dataType {
+func (cg *codeGenerator) ProcessDatatype(dataType *ast.Node) {
+	switch dataType.Token.Kind {
 	case token.BOOL_PTR:
 		cg.writer.WriteString("*bool")
 	case token.BOOL:
 		cg.writer.WriteString("bool")
+	case token.STRING_PTR:
+		cg.writer.WriteString("*string")
+	case token.STRING:
+		cg.writer.WriteString("string")
 	default:
 		panic(fmt.Sprintf("Data type %s not supported", dataType.String()))
 	}

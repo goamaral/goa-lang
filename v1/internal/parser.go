@@ -25,6 +25,11 @@ func (p *parser) Log(format string, a ...interface{}) {
 	}
 }
 
+func (p *parser) LogNodeBuilt(n *ast.Node) *ast.Node {
+	p.Log("Built %s", n.String())
+	return n
+}
+
 func (p *parser) Pop(ctx parserContext, kinds ...token.Kind) (token.Token, bool) {
 	tk, ok := p.lexer.Pop(kinds...)
 	if !ok {
@@ -73,8 +78,7 @@ func (p *parser) BuildPackage() *ast.Node {
 		return nil
 	}
 
-	p.Log("Built Package")
-	return ast.NewNode(ast.Package).AddChildren(funcDef)
+	return p.LogNodeBuilt(ast.NewNode(ast.Package).AddChildren(funcDef))
 }
 
 // FuncDef: DEF Id Block
@@ -103,8 +107,7 @@ func (p *parser) BuildFuncDef() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built FuncDef[%s]", id.Value)
-	return ast.NewNode(ast.FuncDef).AddValue(id.Value).AddChildren(block)
+	return p.LogNodeBuilt(ast.NewNode(ast.FuncDef).AddValue(id.Value).AddChildren(block))
 }
 
 // Id: UPPER_ID | LOWER_ID
@@ -121,8 +124,7 @@ func (p *parser) BuildId() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built Id(%s)", tk.Value)
-	return ast.NewNode(ast.Id).AddValue(tk.Value)
+	return p.LogNodeBuilt(ast.NewNode(ast.Id).AddValue(tk.Value))
 }
 
 // Block: DO StmtList END
@@ -152,8 +154,7 @@ func (p *parser) BuildBlock() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built Block")
-	return ast.NewNode(ast.Block).AddChildren(stmtList...)
+	return p.LogNodeBuilt(ast.NewNode(ast.Block).AddChildren(stmtList...))
 }
 
 // Stmt: FuncCall | VarDecl
@@ -222,8 +223,7 @@ func (p *parser) BuildGoaFuncCall() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built GoaFuncCall(%s)", upperId.Value)
-	return ast.NewNode(ast.GoaFuncCall).AddValue(upperId.Value).AddChildren(funcCallArgList)
+	return p.LogNodeBuilt(ast.NewNode(ast.GoaFuncCall).AddValue(upperId.Value).AddChildren(funcCallArgList))
 }
 
 // FuncCallArgList: FuncCallArg | FuncCallArg COMMA FuncCallArgList | Empty
@@ -246,8 +246,7 @@ func (p *parser) BuildFuncCallArgList() *ast.Node {
 		}
 	}
 
-	p.Log("Built FuncCallArgList")
-	return ast.NewNode(ast.FuncCallArgs).AddChildren(funcCallArgList...)
+	return p.LogNodeBuilt(ast.NewNode(ast.FuncCallArgs).AddChildren(funcCallArgList...))
 }
 
 // FuncCallArg: Terminal
@@ -263,8 +262,8 @@ func (p *parser) BuildFuncCallArg() *ast.Node {
 
 // VarDecl: DataType Id
 func (p *parser) BuildVarDecl() *ast.Node {
-	datatypeTkKind := p.BuildDataType()
-	if datatypeTkKind == token.UNKNOWN {
+	datatype := p.BuildDataType()
+	if datatype == nil {
 		return nil
 	}
 
@@ -273,22 +272,21 @@ func (p *parser) BuildVarDecl() *ast.Node {
 		return nil
 	}
 
-	p.Log("Built VarDecl(%s) - %s", id.Value, datatypeTkKind.String())
-	return ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatypeTkKind)
+	return p.LogNodeBuilt(ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatype))
 }
 
-// DataType: BOOL_PTR | BOOL
-func (p *parser) BuildDataType() token.Kind {
+// DataType: BOOL_PTR | BOOL | STRING_STR | STRING
+func (p *parser) BuildDataType() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
 
-	datatypeTk, ok := p.Pop(ctx, token.BOOL_PTR, token.BOOL)
+	tk, ok := p.Pop(ctx, token.BOOL_PTR, token.BOOL, token.STRING_PTR, token.STRING)
 	if !ok {
 		p.UndoPops(ctx)
-		return token.UNKNOWN
+		return nil
 	}
 
-	return datatypeTk.Kind
+	return ast.NewNode(ast.DataType).AddToken(tk)
 }
 
 // Terminal: UntypedConstant | Id
@@ -339,8 +337,7 @@ func (p *parser) BuildUntypedConstant() *ast.Node {
 		panic("unreachable")
 	}
 
-	p.Log("Built %s(%s)", tk.Kind.String(), tk.Value)
-	return ast.NewNode(kind).AddValue(tk.Value)
+	return p.LogNodeBuilt(ast.NewNode(kind).AddValue(tk.Value))
 }
 
 // Boolean: TRUE | FALSE
@@ -354,6 +351,5 @@ func (p *parser) BuildBoolean() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	p.Log("Built Boolean(%s)", tk.Value)
-	return ast.NewNode(ast.Boolean).AddValue(tk.Value)
+	return p.LogNodeBuilt(ast.NewNode(ast.Boolean).AddValue(tk.Value))
 }
