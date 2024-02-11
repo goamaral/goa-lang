@@ -11,9 +11,9 @@ const (
 
 	// TERMINALS
 	Id
-	Boolean
-	String
-	Integer
+	Bool
+	Str
+	Int
 	Nil
 	DataType
 )
@@ -29,14 +29,14 @@ var kind_nameMap = map[Kind]string{
 
 	// TERMINALS
 	Id:       "ID",
-	Boolean:  "BOOLEAN",
-	String:   "STRING",
-	Integer:  "INTEGER",
+	Bool:     "BOOL",
+	Str:      "STR",
+	Int:      "INT",
 	Nil:      "NIL",
 	DataType: "DATA_TYPE",
 }
 
-var terminalKinds = []Kind{Id, Boolean, String, Integer, Nil, DataType}
+var terminalKinds = []Kind{Id, Bool, Str, Int, Nil, DataType}
 
 type Kind int
 

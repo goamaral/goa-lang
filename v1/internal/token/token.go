@@ -8,69 +8,73 @@ import (
 /* CONSTANTS */
 var (
 	// Keywords
-	defRegex *regexp.Regexp = regexp.MustCompile(`def`)
-	doRegex                 = regexp.MustCompile(`do`)
-	endRegex                = regexp.MustCompile(`end`)
+	DefRegex *regexp.Regexp = regexp.MustCompile(`def`)
+	DoRegex                 = regexp.MustCompile(`do`)
+	EndRegex                = regexp.MustCompile(`end`)
 
 	// Symbols
-	lparRegex  = regexp.MustCompile(`\(`)
-	rparRegex  = regexp.MustCompile(`\)`)
-	hashRegex  = regexp.MustCompile(`#`)
-	commaRegex = regexp.MustCompile(`,`)
+	LparRegex  = regexp.MustCompile(`\(`)
+	RparRegex  = regexp.MustCompile(`\)`)
+	HashRegex  = regexp.MustCompile(`#`)
+	CommaRegex = regexp.MustCompile(`,`)
 
 	// Datatypes
-	boolPtrRegex   = regexp.MustCompile(`bool\*`)
-	boolRegex      = regexp.MustCompile(`bool`)
-	stringPtrRegex = regexp.MustCompile(`string\*`)
-	stringRegex    = regexp.MustCompile(`string`)
+	BoolPtrRegex = regexp.MustCompile(`bool\*`)
+	BoolRegex    = regexp.MustCompile(`bool`)
+	IntPtrRegex  = regexp.MustCompile(`int\*`)
+	IntRegex     = regexp.MustCompile(`int`)
+	StrPtrRegex  = regexp.MustCompile(`string\*`)
+	StrRegex     = regexp.MustCompile(`string`)
 
 	// Untyped constants
-	trueRegex           = regexp.MustCompile(`true`)
-	falseRegex          = regexp.MustCompile(`false`)
-	stringLiteralRegex  = regexp.MustCompile(`\"[^\"]*\"`)
-	integerLiteralRegex = regexp.MustCompile(`-?\d+`)
-	nilRegex            = regexp.MustCompile(`nil`)
+	TrueRegex       = regexp.MustCompile(`true`)
+	FalseRegex      = regexp.MustCompile(`false`)
+	IntLiteralRegex = regexp.MustCompile(`-?\d+`)
+	StrLiteralRegex = regexp.MustCompile(`\"[^\"]*\"`)
+	NilRegex        = regexp.MustCompile(`nil`)
 
 	// Id
-	upperIdRegex = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
-	lowerIdRegex = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
+	UpperIdRegex = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
+	LowerIdRegex = regexp.MustCompile(`[a-z]([a-zA-Z]|_|\d)*`)
 )
 
-var regex_KindMap = map[*regexp.Regexp]Kind{
+var RegexToKind = map[*regexp.Regexp]Kind{
 	// Keywords
-	defRegex: DEF,
-	doRegex:  DO,
-	endRegex: END,
+	DefRegex: DEF,
+	DoRegex:  DO,
+	EndRegex: END,
 
 	// Symbols
-	lparRegex:  LPAR,
-	rparRegex:  RPAR,
-	hashRegex:  HASH,
-	commaRegex: COMMA,
+	LparRegex:  LPAR,
+	RparRegex:  RPAR,
+	HashRegex:  HASH,
+	CommaRegex: COMMA,
 
 	// Datatypes
-	boolPtrRegex:   BOOL_PTR,
-	boolRegex:      BOOL,
-	stringPtrRegex: STRING_PTR,
-	stringRegex:    STRING,
+	BoolPtrRegex: BOOL_PTR,
+	BoolRegex:    BOOL,
+	IntPtrRegex:  INT_PTR,
+	IntRegex:     INT,
+	StrPtrRegex:  STR_PTR,
+	StrRegex:     STR,
 
 	// Untyped constants
-	trueRegex:           TRUE,
-	falseRegex:          FALSE,
-	integerLiteralRegex: INTEGER_LIT,
-	stringLiteralRegex:  STRING_LIT,
-	nilRegex:            NIL,
+	TrueRegex:       TRUE,
+	FalseRegex:      FALSE,
+	IntLiteralRegex: INT_LIT,
+	StrLiteralRegex: STR_LIT,
+	NilRegex:        NIL,
 
 	// Id
-	upperIdRegex: UPPER_ID,
-	lowerIdRegex: LOWER_ID,
+	UpperIdRegex: UPPER_ID,
+	LowerIdRegex: LOWER_ID,
 }
 
-var kind_ShouldDisplayValueMap = map[Kind]bool{
-	INTEGER_LIT: true,
-	STRING_LIT:  true,
-	UPPER_ID:    true,
-	LOWER_ID:    true,
+var kindIsDisplayable = map[Kind]bool{
+	INT_LIT:  true,
+	STR_LIT:  true,
+	UPPER_ID: true,
+	LOWER_ID: true,
 }
 
 /* STRUCT */
@@ -81,7 +85,7 @@ type Token struct {
 
 /* METHODS */
 func (t *Token) String() string {
-	if kind_ShouldDisplayValueMap[t.Kind] {
+	if kindIsDisplayable[t.Kind] {
 		return fmt.Sprintf("%s(%s)", t.Kind.String(), t.Value)
 	} else {
 		return t.Kind.String()

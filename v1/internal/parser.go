@@ -9,7 +9,7 @@ import (
 )
 
 type parser struct {
-	lexer       YaccLexer
+	lexer       *Lexer
 	inDebugMode bool
 }
 
@@ -57,7 +57,7 @@ func (p *parser) Cleanup(ctx parserContext) {
 	ctx.nPops = 0
 }
 
-func BuildAst(lexer YaccLexer, inDebugMode bool) (*ast.Ast, bool) {
+func BuildAst(lexer *Lexer, inDebugMode bool) (*ast.Ast, bool) {
 	p := parser{lexer: lexer, inDebugMode: inDebugMode}
 	p.Log("===== BUILDING AST =====")
 	defer p.Log("")
@@ -275,12 +275,12 @@ func (p *parser) BuildVarDecl() *ast.Node {
 	return p.LogNodeBuilt(ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatype))
 }
 
-// DataType: BOOL_PTR | BOOL | STRING_STR | STRING
+// DataType: BOOL_PTR | BOOL | INT_PTR | INT | STRING_STR | STRING
 func (p *parser) BuildDataType() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
 
-	tk, ok := p.Pop(ctx, token.BOOL_PTR, token.BOOL, token.STRING_PTR, token.STRING)
+	tk, ok := p.Pop(ctx, token.BOOL_PTR, token.BOOL, token.INT_PTR, token.INT, token.STR_PTR, token.STR)
 	if !ok {
 		p.UndoPops(ctx)
 		return nil
@@ -308,29 +308,29 @@ func (p *parser) BuildTerminal() *ast.Node {
 	return nil
 }
 
-// UntypedConstant: Boolean | STRING_LIT | INTEGER_LIT | NIL
+// UntypedConstant: Bool | INT_LIT | STR_LIT | NIL
 func (p *parser) BuildUntypedConstant() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
 
 	// Boolean
-	boolean := p.BuildBoolean()
-	if boolean != nil {
-		return boolean
+	bool := p.BuildBool()
+	if bool != nil {
+		return bool
 	}
 
-	// STRING_LIT | INTEGER_LIT | NIL
-	tk, ok := p.Pop(ctx, token.STRING_LIT, token.INTEGER_LIT, token.NIL)
+	// INTEGER_LIT | STR_LIT | NIL
+	tk, ok := p.Pop(ctx, token.INT_LIT, token.STR_LIT, token.NIL)
 	if !ok {
 		return p.UndoPops(ctx)
 	}
 
 	var kind ast.Kind
 	switch tk.Kind {
-	case token.STRING_LIT:
-		kind = ast.String
-	case token.INTEGER_LIT:
-		kind = ast.Integer
+	case token.INT_LIT:
+		kind = ast.Int
+	case token.STR_LIT:
+		kind = ast.Str
 	case token.NIL:
 		kind = ast.Nil
 	default:
@@ -340,8 +340,8 @@ func (p *parser) BuildUntypedConstant() *ast.Node {
 	return p.LogNodeBuilt(ast.NewNode(kind).AddValue(tk.Value))
 }
 
-// Boolean: TRUE | FALSE
-func (p *parser) BuildBoolean() *ast.Node {
+// Bool: TRUE | FALSE
+func (p *parser) BuildBool() *ast.Node {
 	var ctx parserContext
 	defer p.Cleanup(ctx)
 
@@ -351,5 +351,5 @@ func (p *parser) BuildBoolean() *ast.Node {
 		return p.UndoPops(ctx)
 	}
 
-	return p.LogNodeBuilt(ast.NewNode(ast.Boolean).AddValue(tk.Value))
+	return p.LogNodeBuilt(ast.NewNode(ast.Bool).AddValue(tk.Value))
 }

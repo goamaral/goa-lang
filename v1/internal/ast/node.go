@@ -2,9 +2,8 @@ package ast
 
 import (
 	"fmt"
+	"slices"
 	"strings"
-
-	"golang.org/x/exp/slices"
 
 	"github.com/Goamaral/goa-lang/v1/internal/token"
 )
@@ -43,7 +42,7 @@ func (n *Node) String() string {
 
 func (n *Node) Print(identation int) {
 	for i := 0; i < identation; i += 1 {
-		fmt.Print("..")
+		fmt.Print("  ")
 	}
 
 	fmt.Println(n.String())

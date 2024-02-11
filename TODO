@@ -1,7 +1,6 @@
-- Implement var declarations
-- Return errors if all tokens were not consumed
-- Recover from errors
 - Add line number and column number in errors
+- Recover from errors
+- Return errors if all tokens were not consumed
 - Replace lex, ast, codegen flags with until=\<step=lexer, ast, codegen, codegen\> flag
 - Add debug-lexer, debug-ast, debug-ast-verbose, debug-codegen
 - Reimplement lexer with https://pkg.go.dev/text/scanner
@@ -11,4 +10,4 @@
 - Parse -precompile to only generate go code
 - Parse -precompile-output flag to set precompiled output filename
 - Parse -output flag to set output filename
-- Rename v1 to transpiler
+- Rename v1 to transpiler/v1

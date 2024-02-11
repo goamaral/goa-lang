@@ -35,9 +35,13 @@ func (cg *codeGenerator) ProcessDatatype(dataType *ast.Node) {
 		cg.writer.WriteString("*bool")
 	case token.BOOL:
 		cg.writer.WriteString("bool")
-	case token.STRING_PTR:
+	case token.INT_PTR:
+		cg.writer.WriteString("*int")
+	case token.INT:
+		cg.writer.WriteString("int")
+	case token.STR_PTR:
 		cg.writer.WriteString("*string")
-	case token.STRING:
+	case token.STR:
 		cg.writer.WriteString("string")
 	default:
 		panic(fmt.Sprintf("Data type %s not supported", dataType.String()))

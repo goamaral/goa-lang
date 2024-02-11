@@ -3,11 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/Goamaral/goa-lang/v1/internal"
-	"github.com/Goamaral/goa-lang/v1/internal/token"
 )
 
 func main() {
@@ -27,14 +25,14 @@ func main() {
 	var err error
 
 	sourceFileLocation := os.Args[len(os.Args)-1]
-	sourceCodeBytes, err = ioutil.ReadFile(sourceFileLocation)
+	sourceCodeBytes, err = os.ReadFile(sourceFileLocation)
 	if err != nil {
 		fmt.Printf("Error reading %s\n", sourceFileLocation)
 		return
 	}
 
 	// Lexing
-	lexer := token.NewLexer(string(sourceCodeBytes))
+	lexer := internal.NewLexer(string(sourceCodeBytes))
 	lexer.Parse()
 	if inDebugMode {
 		lexer.Print()
@@ -44,7 +42,7 @@ func main() {
 	}
 
 	// Building syntax tree
-	syntaxTree, ok := internal.BuildAst(internal.NewYaccLexer(lexer), inDebugMode)
+	syntaxTree, ok := internal.BuildAst(&lexer, inDebugMode)
 	if inDebugMode && ok {
 		syntaxTree.Print()
 	}

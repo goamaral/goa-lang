@@ -1,0 +1,6 @@
+def main do
+  int intVar
+  #Println(intVar)
+  int* intPtrVar
+  #Println(intPtrVar)
+end

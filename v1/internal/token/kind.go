@@ -18,14 +18,16 @@ const (
 	// Datatypes
 	BOOL_PTR
 	BOOL
-	STRING_PTR
-	STRING
+	INT_PTR
+	INT
+	STR_PTR
+	STR
 
 	// Untyped constants
 	TRUE
 	FALSE
-	INTEGER_LIT
-	STRING_LIT
+	INT_LIT
+	STR_LIT
 	NIL
 
 	// Id
@@ -33,7 +35,7 @@ const (
 	LOWER_ID
 )
 
-var kind_nameMap = map[Kind]string{
+var kindToString = map[Kind]string{
 	UNKNOWN: "UNKNOWN",
 
 	// Keywords
@@ -48,17 +50,19 @@ var kind_nameMap = map[Kind]string{
 	COMMA: "COMMA",
 
 	// Datatypes
-	BOOL_PTR:   "BOOL_PTR",
-	BOOL:       "BOOL",
-	STRING_PTR: "STRING_PTR",
-	STRING:     "STRING",
+	BOOL_PTR: "BOOL_PTR",
+	BOOL:     "BOOL",
+	INT_PTR:  "INT_PTR",
+	INT:      "INT",
+	STR_PTR:  "STR_PTR",
+	STR:      "STR",
 
 	// Untyped constants
-	TRUE:        "TRUE",
-	FALSE:       "FALSE",
-	INTEGER_LIT: "INTEGER_LIT",
-	STRING_LIT:  "STRING_LIT",
-	NIL:         "NIL",
+	TRUE:    "TRUE",
+	FALSE:   "FALSE",
+	INT_LIT: "INT_LIT",
+	STR_LIT: "STR_LIT",
+	NIL:     "NIL",
 
 	// Id
 	UPPER_ID: "UPPER_ID",
@@ -70,5 +74,5 @@ type Kind int
 
 /* METHODS */
 func (k *Kind) String() string {
-	return kind_nameMap[*k]
+	return kindToString[*k]
 }
