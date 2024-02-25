@@ -21,18 +21,15 @@ func main() {
 	inDebugMode = stopAtLexer || stopAtAst || stopAtCodegen || inDebugMode
 
 	// Reading source code from file to stdin
-	var sourceCodeBytes []byte
-	var err error
-
 	sourceFileLocation := os.Args[len(os.Args)-1]
-	sourceCodeBytes, err = os.ReadFile(sourceFileLocation)
+	sourceCode, err := os.ReadFile(sourceFileLocation)
 	if err != nil {
 		fmt.Printf("Error reading %s\n", sourceFileLocation)
 		return
 	}
 
 	// Lexing
-	lexer := internal.NewLexer(string(sourceCodeBytes))
+	lexer := internal.NewLexer(sourceCode)
 	lexer.Parse()
 	if inDebugMode {
 		lexer.Print()
@@ -42,11 +39,15 @@ func main() {
 	}
 
 	// Building syntax tree
-	syntaxTree, ok := internal.BuildAst(&lexer, inDebugMode)
-	if inDebugMode && ok {
+	syntaxTree, parserErr := internal.BuildAst(&lexer, inDebugMode)
+	if parserErr != nil {
+		fmt.Printf("Error: %+v", parserErr)
+		os.Exit(1)
+	}
+	if inDebugMode {
 		syntaxTree.Print()
 	}
-	if !ok || stopAtAst {
+	if stopAtAst {
 		return
 	}
 

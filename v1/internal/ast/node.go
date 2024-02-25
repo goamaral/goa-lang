@@ -10,15 +10,16 @@ import (
 
 type Node struct {
 	Kind     Kind
-	Value    string
+	NPops    uint
+	Value    []byte
 	DataType *Node
 
 	Children []*Node
 	Token    token.Token
 }
 
-func NewNode(kind Kind) *Node {
-	return &Node{Kind: kind}
+func NewNode(kind Kind, nPops uint) *Node {
+	return &Node{Kind: kind, NPops: nPops}
 }
 
 func (n *Node) String() string {
@@ -29,7 +30,7 @@ func (n *Node) String() string {
 	var sb strings.Builder
 	sb.WriteString(n.Kind.String())
 
-	if n.Value != "" {
+	if len(n.Value) > 0 {
 		sb.WriteString(fmt.Sprintf("(%s)", n.Value))
 	}
 
@@ -53,7 +54,7 @@ func (n *Node) Print(identation int) {
 	}
 }
 
-func (n *Node) AddValue(value string) *Node {
+func (n *Node) AddValue(value []byte) *Node {
 	n.Value = value
 	return n
 }

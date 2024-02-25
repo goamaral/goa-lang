@@ -2,20 +2,90 @@ package internal
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/Goamaral/goa-lang/v1/internal/ast"
 	"github.com/Goamaral/goa-lang/v1/internal/token"
 )
 
+type ParserSyntaxError struct {
+	SourceCodeIndex    int
+	Kind               ast.Kind
+	ExpectedTokenKinds []token.Kind
+	InnerErrors        []*ParserSyntaxError
+}
+
+type popContext struct {
+	parser      *parser
+	nPops       uint
+	kind        ast.Kind
+	innerErrors []*ParserSyntaxError
+}
+
+func NewPopContext(parser *parser, kind ast.Kind) *popContext {
+	return &popContext{parser: parser, kind: kind}
+}
+
+func (ctx *popContext) Pop(tokenKinds ...token.Kind) (token.Token, *ParserSyntaxError) {
+	tk, ok := ctx.parser.lexer.Pop(tokenKinds)
+	if !ok {
+		return token.Token{}, ctx.BuildError(tokenKinds)
+	}
+
+	ctx.parser.Log("Poping %s", tk.String())
+	ctx.nPops++
+	return tk, nil
+}
+
+func (ctx *popContext) Cleanup() {
+	ctx.parser.lexer.UndoPops(ctx.nPops)
+	ctx.nPops = 0
+}
+
+func (ctx *popContext) BuildNode() *ast.Node {
+	n := ast.NewNode(ctx.kind, ctx.nPops)
+	ctx.nPops = 0
+	ctx.parser.Log("Built %s", n.String())
+	return n
+}
+
+func (ctx *popContext) AddNode(n *ast.Node) {
+	ctx.nPops += n.NPops
+}
+
+func (ctx *popContext) RemoveNode(n *ast.Node) {
+	ctx.parser.lexer.UndoPops(n.NPops)
+	ctx.nPops -= n.NPops
+}
+
+func (ctx *popContext) AddError(err *ParserSyntaxError) {
+	ctx.innerErrors = append(ctx.innerErrors, err)
+}
+
+func (ctx *popContext) BuildError(expectedTokenKinds []token.Kind) *ParserSyntaxError {
+	return &ParserSyntaxError{
+		SourceCodeIndex:    ctx.parser.lexer.NextTokenIndex,
+		Kind:               ctx.kind,
+		InnerErrors:        ctx.innerErrors,
+		ExpectedTokenKinds: expectedTokenKinds,
+	}
+}
+
+func BuildAst(lexer *Lexer, inDebugMode bool) (*ast.Ast, *ParserSyntaxError) {
+	p := parser{lexer: lexer, inDebugMode: inDebugMode}
+	p.Log("===== BUILDING AST =====")
+	defer p.Log("")
+
+	pkg, err := p.BuildPackage()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.Ast{Package: pkg}, nil
+}
+
 type parser struct {
 	lexer       *Lexer
 	inDebugMode bool
-}
-
-type parserContext struct {
-	nPops    int
-	undoPops bool
 }
 
 func (p *parser) Log(format string, a ...interface{}) {
@@ -25,331 +95,326 @@ func (p *parser) Log(format string, a ...interface{}) {
 	}
 }
 
-func (p *parser) LogNodeBuilt(n *ast.Node) *ast.Node {
-	p.Log("Built %s", n.String())
-	return n
-}
-
-func (p *parser) Pop(ctx parserContext, kinds ...token.Kind) (token.Token, bool) {
-	tk, ok := p.lexer.Pop(kinds...)
-	if !ok {
-		return token.Token{}, false
-	}
-
-	p.Log("Poping %s", tk.String())
-	ctx.nPops++
-	return tk, true
-}
-
-func (p *parser) UndoPops(ctx parserContext) *ast.Node {
-	_, _, no, _ := runtime.Caller(1)
-	p.Log("Line %d called undo pops", no)
-	ctx.undoPops = true
-	return nil
-}
-
-func (p *parser) Cleanup(ctx parserContext) {
-	if ctx.undoPops {
-		p.Log("Undoing %d pops", ctx.nPops)
-		p.lexer.UndoPops(ctx.nPops)
-	}
-	ctx.undoPops = false
-	ctx.nPops = 0
-}
-
-func BuildAst(lexer *Lexer, inDebugMode bool) (*ast.Ast, bool) {
-	p := parser{lexer: lexer, inDebugMode: inDebugMode}
-	p.Log("===== BUILDING AST =====")
-	defer p.Log("")
-
-	pkg := p.BuildPackage()
-	if pkg == nil {
-		return nil, false
-	}
-
-	return &ast.Ast{Package: pkg}, true
-}
-
 // Package: FuncDef
-func (p *parser) BuildPackage() *ast.Node {
-	// FuncDef
-	funcDef := p.BuildFuncDef()
-	if funcDef == nil {
-		return nil
-	}
+func (p *parser) BuildPackage() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.Package)
+	defer ctx.Cleanup()
 
-	return p.LogNodeBuilt(ast.NewNode(ast.Package).AddChildren(funcDef))
+	funcDef, err := p.BuildFuncDef()
+	if funcDef != nil {
+		return nil, err
+	}
+	ctx.AddNode(funcDef)
+
+	return ctx.BuildNode().AddChildren(funcDef), nil
 }
 
 // FuncDef: DEF Id Block
-func (p *parser) BuildFuncDef() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+func (p *parser) BuildFuncDef() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.FuncDef)
+	defer ctx.Cleanup()
 
-	var id, block *ast.Node
-	var ok bool
-
-	// DEF
-	_, ok = p.Pop(ctx, token.DEF)
-	if !ok {
-		return p.UndoPops(ctx)
+	_, err := ctx.Pop(token.DEF)
+	if err != nil {
+		return nil, err
 	}
 
-	// Id
-	id = p.BuildId()
-	if id == nil {
-		return p.UndoPops(ctx)
+	id, err := p.BuildId()
+	if err != nil {
+		return nil, err
 	}
+	ctx.AddNode(id)
 
-	// Block
-	block = p.BuildBlock()
-	if block == nil {
-		return p.UndoPops(ctx)
+	block, err := p.BuildBlock()
+	if err != nil {
+		return nil, err
 	}
+	ctx.AddNode(block)
 
-	return p.LogNodeBuilt(ast.NewNode(ast.FuncDef).AddValue(id.Value).AddChildren(block))
+	return ctx.BuildNode().AddValue(id.Value).AddChildren(block), nil
 }
 
 // Id: UPPER_ID | LOWER_ID
-func (p *parser) BuildId() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+func (p *parser) BuildId() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.Id)
+	defer ctx.Cleanup()
 
-	var tk token.Token
-	var ok bool
-
-	// UPPER_ID | LOWER_ID
-	tk, ok = p.Pop(ctx, token.UPPER_ID, token.LOWER_ID)
-	if !ok {
-		return p.UndoPops(ctx)
+	tk, err := ctx.Pop(token.UPPER_ID, token.LOWER_ID)
+	if err != nil {
+		return nil, err
 	}
 
-	return p.LogNodeBuilt(ast.NewNode(ast.Id).AddValue(tk.Value))
+	return ctx.BuildNode().AddValue(tk.Value), nil
 }
 
 // Block: DO StmtList END
-func (p *parser) BuildBlock() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+func (p *parser) BuildBlock() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.Block)
+	defer ctx.Cleanup()
 
-	// DO
-	_, ok := p.Pop(ctx, token.DO)
-	if !ok {
-		return p.UndoPops(ctx)
+	_, err := ctx.Pop(token.DO)
+	if err != nil {
+		return nil, err
 	}
 
-	// StmtList: Stmt StmtList | Empty
 	var stmtList []*ast.Node
 	for {
-		stmt := p.BuildStmt()
+		stmt, err := p.BuildStmt()
+		if err != nil {
+			return nil, err
+		}
 		if stmt == nil {
 			break
 		}
 		stmtList = append(stmtList, stmt)
+		ctx.AddNode(stmt)
 	}
 
-	// END
-	_, ok = p.Pop(ctx, token.END)
-	if !ok {
-		return p.UndoPops(ctx)
+	_, err = ctx.Pop(token.END)
+	if err != nil {
+		return nil, err
 	}
 
-	return p.LogNodeBuilt(ast.NewNode(ast.Block).AddChildren(stmtList...))
+	return ctx.BuildNode().AddChildren(stmtList...), nil
 }
 
 // Stmt: FuncCall | VarDecl
-func (p *parser) BuildStmt() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+func (p *parser) BuildStmt() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.Stmt)
+	defer ctx.Cleanup()
 
-	funcCall := p.BuildFuncCall()
-	if funcCall != nil {
-		return funcCall
+	funcCall, funcCallErr := p.BuildFuncCall()
+	if funcCallErr == nil {
+		return funcCall, nil
 	}
+	ctx.AddError(funcCallErr)
 
-	varDecl := p.BuildVarDecl()
-	if varDecl != nil {
-		return varDecl
+	varDecl, varDeclErr := p.BuildVarDecl()
+	if varDeclErr == nil {
+		return varDecl, nil
 	}
+	ctx.AddError(varDeclErr)
 
-	return nil
+	return nil, ctx.BuildError(nil)
 }
 
 // FuncCall: GoaFuncCall
-func (p *parser) BuildFuncCall() *ast.Node {
-	// GoaFuncCall
-	goaFuncCall := p.BuildGoaFuncCall()
-	if goaFuncCall != nil {
-		return goaFuncCall
+func (p *parser) BuildFuncCall() (*ast.Node, *ParserSyntaxError) {
+	goaFuncCall, err := p.BuildGoaFuncCall()
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return goaFuncCall, nil
 }
 
-// GoaFuncCall: HASH UPPER_ID LPAR FuncCallArgList RPAR
-func (p *parser) BuildGoaFuncCall() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+// GoaFuncCall: HASH UPPER_ID FuncCallArgList
+func (p *parser) BuildGoaFuncCall() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.GoaFuncCall)
+	defer ctx.Cleanup()
 
-	var upperId token.Token
-
-	// HASH
-	_, ok := p.Pop(ctx, token.HASH)
-	if !ok {
-		return p.UndoPops(ctx)
+	_, err := ctx.Pop(token.HASH)
+	if err != nil {
+		return nil, err
 	}
 
-	// UPPER_ID
-	upperId, ok = p.Pop(ctx, token.UPPER_ID)
-	if !ok {
-		return p.UndoPops(ctx)
+	upperId, err := ctx.Pop(token.UPPER_ID)
+	if err != nil {
+		return nil, err
 	}
 
-	// LPAR
-	_, ok = p.Pop(ctx, token.LPAR)
-	if !ok {
-		return p.UndoPops(ctx)
+	funcCallArgList, err := p.BuildFuncCallArgList()
+	if err != nil {
+		return nil, err
 	}
+	ctx.AddNode(funcCallArgList)
 
-	// FuncCallArgList
-	funcCallArgList := p.BuildFuncCallArgList()
-	if funcCallArgList == nil {
-		return p.UndoPops(ctx)
-	}
-
-	// RPAR
-	_, ok = p.Pop(ctx, token.RPAR)
-	if !ok {
-		return p.UndoPops(ctx)
-	}
-
-	return p.LogNodeBuilt(ast.NewNode(ast.GoaFuncCall).AddValue(upperId.Value).AddChildren(funcCallArgList))
+	return ctx.BuildNode().AddValue(upperId.Value).AddChildren(funcCallArgList), nil
 }
 
-// FuncCallArgList: FuncCallArg | FuncCallArg COMMA FuncCallArgList | Empty
-func (p *parser) BuildFuncCallArgList() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+// FuncCallArgList: LPAR (FuncCallArg | FuncCallArg COMMA FuncCallArgList | Empty) RPAR
+func (p *parser) BuildFuncCallArgList() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.FuncCallArgList)
+	defer ctx.Cleanup()
+
+	_, err := ctx.Pop(token.LPAR)
+	if err != nil {
+		return nil, err
+	}
 
 	var funcCallArgList []*ast.Node
 	for {
-		funcCallArg := p.BuildFuncCallArg()
-		if funcCallArg == nil {
+		funcCallArg, err := p.BuildFuncCallArg()
+		if err != nil {
 			break
 		}
 		funcCallArgList = append(funcCallArgList, funcCallArg)
+		ctx.AddNode(funcCallArg)
 
-		// COMMA
-		_, ok := p.Pop(ctx, token.COMMA)
-		if !ok {
+		_, err = ctx.Pop(token.COMMA)
+		if err != nil {
 			break
 		}
 	}
 
-	return p.LogNodeBuilt(ast.NewNode(ast.FuncCallArgs).AddChildren(funcCallArgList...))
-}
-
-// FuncCallArg: Terminal
-func (p *parser) BuildFuncCallArg() *ast.Node {
-	// Terminal
-	terminal := p.BuildTerminal()
-	if terminal != nil {
-		return terminal
+	_, err = ctx.Pop(token.RPAR)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return ctx.BuildNode().AddChildren(funcCallArgList...), nil
+}
+
+// FuncCallArg: Expr
+func (p *parser) BuildFuncCallArg() (*ast.Node, *ParserSyntaxError) {
+	expr, err := p.BuildExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	return expr, nil
+}
+
+// Expr: BinOp | ParExpr | Terminal
+func (p *parser) BuildExpr() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.Expr)
+	defer ctx.Cleanup()
+
+	terminal, terminalErr := p.BuildTerminal()
+	if terminalErr == nil {
+		binOp, binOpErr := p.BuildBinOp(terminal)
+		if binOpErr == nil {
+			return binOp, nil
+		}
+		ctx.AddError(binOpErr)
+	} else {
+		ctx.AddError(terminalErr)
+	}
+
+	parExpr, parExprErr := p.BuildParExpr()
+	if parExprErr == nil {
+		return parExpr, nil
+	}
+
+	return nil, ctx.BuildError(nil)
+}
+
+// ParExpr: LPAR Expr RPAR
+func (p *parser) BuildParExpr() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.ParExpr)
+	defer ctx.Cleanup()
+
+	_, err := ctx.Pop(token.LPAR)
+	if err != nil {
+		return nil, err
+	}
+
+	expr, err := p.BuildExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ctx.Pop(token.RPAR)
+	if err != nil {
+		return nil, err
+	}
+
+	return expr, nil
+}
+
+// BinOp: Expr (PLUS | MINUS) Expr
+func (p *parser) BuildBinOp(lExpr *ast.Node) (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.BinOp)
+	defer ctx.Cleanup()
+
+	tk, err := ctx.Pop(token.PLUS, token.MINUS)
+	if err != nil {
+		return nil, err
+	}
+
+	rExpr, err := p.BuildExpr()
+	if err != nil {
+		return nil, err
+	}
+	ctx.AddNode(rExpr)
+
+	ctx.AddNode(lExpr)
+	return ctx.BuildNode().AddChildren(lExpr, rExpr).AddToken(tk), nil
 }
 
 // VarDecl: DataType Id
-func (p *parser) BuildVarDecl() *ast.Node {
-	datatype := p.BuildDataType()
-	if datatype == nil {
-		return nil
-	}
+func (p *parser) BuildVarDecl() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.VarDecl)
+	defer ctx.Cleanup()
 
-	id := p.BuildId()
-	if id == nil {
-		return nil
+	datatype, err := p.BuildDataType()
+	if err != nil {
+		return nil, err
 	}
+	ctx.AddNode(datatype)
 
-	return p.LogNodeBuilt(ast.NewNode(ast.VarDecl).AddValue(id.Value).AddDataType(datatype))
+	id, err := p.BuildId()
+	if err != nil {
+		return nil, err
+	}
+	ctx.AddNode(id)
+
+	return ctx.BuildNode().AddValue(id.Value).AddDataType(datatype), nil
 }
 
 // DataType: BOOL_PTR | BOOL | INT_PTR | INT | STRING_STR | STRING
-func (p *parser) BuildDataType() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
+func (p *parser) BuildDataType() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.DataType)
+	defer ctx.Cleanup()
 
-	tk, ok := p.Pop(ctx, token.BOOL_PTR, token.BOOL, token.INT_PTR, token.INT, token.STR_PTR, token.STR)
-	if !ok {
-		p.UndoPops(ctx)
-		return nil
+	tk, err := ctx.Pop(token.BOOL_PTR, token.BOOL, token.INT_PTR, token.INT, token.STR_PTR, token.STR)
+	if err != nil {
+		return nil, err
 	}
 
-	return ast.NewNode(ast.DataType).AddToken(tk)
+	return ctx.BuildNode().AddToken(tk), nil
 }
 
 // Terminal: UntypedConstant | Id
-func (p *parser) BuildTerminal() *ast.Node {
-	var terminal *ast.Node
+func (p *parser) BuildTerminal() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.Terminal)
+	defer ctx.Cleanup()
 
-	// UntypedConstant
-	terminal = p.BuildUntypedConstant()
-	if terminal != nil {
-		return terminal
+	uc, err := p.BuildUntypedConstant()
+	if err == nil {
+		return uc, nil
 	}
+	ctx.AddError(err)
 
-	// Id
-	terminal = p.BuildId()
-	if terminal != nil {
-		return terminal
+	id, err := p.BuildId()
+	if err == nil {
+		return id, nil
 	}
+	ctx.AddError(err)
 
-	return nil
+	return nil, ctx.BuildError(nil)
 }
 
-// UntypedConstant: Bool | INT_LIT | STR_LIT | NIL
-func (p *parser) BuildUntypedConstant() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
-
-	// Boolean
-	bool := p.BuildBool()
-	if bool != nil {
-		return bool
+// UntypedConstant: BOOL_LIT | INT_LIT | STR_LIT | NIL
+func (p *parser) BuildUntypedConstant() (*ast.Node, *ParserSyntaxError) {
+	ctx := NewPopContext(p, ast.UntypedConstant)
+	tk, err := ctx.Pop(token.BOOL_LIT, token.INT_LIT, token.STR_LIT, token.NIL)
+	if err != nil {
+		return nil, err
 	}
 
-	// INTEGER_LIT | STR_LIT | NIL
-	tk, ok := p.Pop(ctx, token.INT_LIT, token.STR_LIT, token.NIL)
-	if !ok {
-		return p.UndoPops(ctx)
-	}
-
-	var kind ast.Kind
 	switch tk.Kind {
 	case token.INT_LIT:
-		kind = ast.Int
+		ctx.kind = ast.Int
 	case token.STR_LIT:
-		kind = ast.Str
+		ctx.kind = ast.Str
 	case token.NIL:
-		kind = ast.Nil
+		ctx.kind = ast.Nil
+	case token.BOOL_LIT:
+		ctx.kind = ast.Bool
 	default:
 		panic("unreachable")
 	}
 
-	return p.LogNodeBuilt(ast.NewNode(kind).AddValue(tk.Value))
-}
-
-// Bool: TRUE | FALSE
-func (p *parser) BuildBool() *ast.Node {
-	var ctx parserContext
-	defer p.Cleanup(ctx)
-
-	// TRUE | FALSE
-	tk, ok := p.Pop(ctx, token.TRUE, token.FALSE)
-	if !ok {
-		return p.UndoPops(ctx)
-	}
-
-	return p.LogNodeBuilt(ast.NewNode(ast.Bool).AddValue(tk.Value))
+	return ctx.BuildNode().AddValue(tk.Value), nil
 }

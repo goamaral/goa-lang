@@ -14,6 +14,8 @@ const (
 	LPAR
 	HASH
 	COMMA
+	PLUS
+	MINUS
 
 	// Datatypes
 	BOOL_PTR
@@ -24,8 +26,7 @@ const (
 	STR
 
 	// Untyped constants
-	TRUE
-	FALSE
+	BOOL_LIT
 	INT_LIT
 	STR_LIT
 	NIL
@@ -48,6 +49,8 @@ var kindToString = map[Kind]string{
 	LPAR:  "LPAR",
 	HASH:  "HASH",
 	COMMA: "COMMA",
+	PLUS:  "PLUS",
+	MINUS: "MINUS",
 
 	// Datatypes
 	BOOL_PTR: "BOOL_PTR",
@@ -58,11 +61,10 @@ var kindToString = map[Kind]string{
 	STR:      "STR",
 
 	// Untyped constants
-	TRUE:    "TRUE",
-	FALSE:   "FALSE",
-	INT_LIT: "INT_LIT",
-	STR_LIT: "STR_LIT",
-	NIL:     "NIL",
+	BOOL_LIT: "BOOL_LIT",
+	INT_LIT:  "INT_LIT",
+	STR_LIT:  "STR_LIT",
+	NIL:      "NIL",
 
 	// Id
 	UPPER_ID: "UPPER_ID",

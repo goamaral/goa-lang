@@ -17,6 +17,8 @@ var (
 	RparRegex  = regexp.MustCompile(`\)`)
 	HashRegex  = regexp.MustCompile(`#`)
 	CommaRegex = regexp.MustCompile(`,`)
+	PlusRegex  = regexp.MustCompile(`\+`)
+	MinusRegex = regexp.MustCompile(`-`)
 
 	// Datatypes
 	BoolPtrRegex = regexp.MustCompile(`bool\*`)
@@ -27,11 +29,10 @@ var (
 	StrRegex     = regexp.MustCompile(`string`)
 
 	// Untyped constants
-	TrueRegex       = regexp.MustCompile(`true`)
-	FalseRegex      = regexp.MustCompile(`false`)
-	IntLiteralRegex = regexp.MustCompile(`-?\d+`)
-	StrLiteralRegex = regexp.MustCompile(`\"[^\"]*\"`)
-	NilRegex        = regexp.MustCompile(`nil`)
+	BoolLiteralRegex = regexp.MustCompile(`true|false`)
+	IntLiteralRegex  = regexp.MustCompile(`-?\d+`)
+	StrLiteralRegex  = regexp.MustCompile(`\"[^\"]*\"`)
+	NilRegex         = regexp.MustCompile(`nil`)
 
 	// Id
 	UpperIdRegex = regexp.MustCompile(`[A-Z]([a-zA-Z]|_|\d)*`)
@@ -49,6 +50,8 @@ var RegexToKind = map[*regexp.Regexp]Kind{
 	RparRegex:  RPAR,
 	HashRegex:  HASH,
 	CommaRegex: COMMA,
+	PlusRegex:  PLUS,
+	MinusRegex: MINUS,
 
 	// Datatypes
 	BoolPtrRegex: BOOL_PTR,
@@ -59,11 +62,10 @@ var RegexToKind = map[*regexp.Regexp]Kind{
 	StrRegex:     STR,
 
 	// Untyped constants
-	TrueRegex:       TRUE,
-	FalseRegex:      FALSE,
-	IntLiteralRegex: INT_LIT,
-	StrLiteralRegex: STR_LIT,
-	NilRegex:        NIL,
+	BoolLiteralRegex: BOOL_LIT,
+	IntLiteralRegex:  INT_LIT,
+	StrLiteralRegex:  STR_LIT,
+	NilRegex:         NIL,
 
 	// Id
 	UpperIdRegex: UPPER_ID,
@@ -71,6 +73,7 @@ var RegexToKind = map[*regexp.Regexp]Kind{
 }
 
 var kindIsDisplayable = map[Kind]bool{
+	BOOL_LIT: true,
 	INT_LIT:  true,
 	STR_LIT:  true,
 	UPPER_ID: true,
@@ -79,8 +82,9 @@ var kindIsDisplayable = map[Kind]bool{
 
 /* STRUCT */
 type Token struct {
-	Kind  Kind
-	Value string
+	Kind            Kind
+	Value           []byte
+	SourceCodeIndex int
 }
 
 /* METHODS */

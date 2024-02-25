@@ -5,9 +5,15 @@ const (
 	Package Kind = iota
 	FuncDef
 	Block
+	Stmt
 	GoaFuncCall
-	FuncCallArgs
+	FuncCallArgList
+	Expr
+	ParExpr
+	BinOp
 	VarDecl
+	Terminal
+	UntypedConstant
 
 	// TERMINALS
 	Id
@@ -20,15 +26,17 @@ const (
 
 var kind_nameMap = map[Kind]string{
 	// NON TERMINALS
-	Package:      "PACKAGE",
-	FuncDef:      "FUNC_DEF",
-	Block:        "BLOCK",
-	GoaFuncCall:  "GOA_FUNC_CALL",
-	FuncCallArgs: "FUNC_CALL_ARGS",
-	VarDecl:      "VAR_DECL",
+	Package:         "PACKAGE",
+	FuncDef:         "FUNC_DEF",
+	Block:           "BLOCK",
+	GoaFuncCall:     "GOA_FUNC_CALL",
+	FuncCallArgList: "FUNC_CALL_ARG_LIST",
+	Expr:            "EXPR",
+	VarDecl:         "VAR_DECL",
 
 	// TERMINALS
-	Id:       "ID",
+	Id: "ID",
+	// TODO: Try to replace types below with Literal Kind
 	Bool:     "BOOL",
 	Str:      "STR",
 	Int:      "INT",

@@ -59,7 +59,7 @@ func (cg *codeGenerator) ProcessChildren(n *ast.Node, seperator string) {
 
 func (cg *codeGenerator) ProcessNode(n *ast.Node) {
 	if n.IsTerminal() {
-		cg.writer.WriteString(n.Value)
+		cg.writer.Write(n.Value)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (cg *codeGenerator) ProcessNode(n *ast.Node) {
 		cg.ProcessBlock(n)
 	case ast.GoaFuncCall:
 		cg.ProcessGoaFuncCall(n)
-	case ast.FuncCallArgs:
+	case ast.FuncCallArgList:
 		cg.ProcessFuncCallArgs(n)
 	case ast.VarDecl:
 		cg.ProcessVarDecl(n)
@@ -109,7 +109,7 @@ func (cg *codeGenerator) ProcessBlock(block *ast.Node) {
 
 func (cg *codeGenerator) ProcessGoaFuncCall(goaFuncCall *ast.Node) {
 	cg.WriteIdentation()
-	cg.writer.WriteString(strings.ToLower(goaFuncCall.Value))
+	cg.writer.WriteString(strings.ToLower(string(goaFuncCall.Value)))
 	oldIdentation := cg.identation
 	cg.identation = 0
 	cg.ProcessChildren(goaFuncCall, "")

@@ -20,6 +20,8 @@ var regexPriorityOrder = []*regexp.Regexp{
 	token.RparRegex,
 	token.HashRegex,
 	token.CommaRegex,
+	token.PlusRegex,
+	token.MinusRegex,
 
 	// Datatypes
 	token.BoolPtrRegex,
@@ -30,8 +32,7 @@ var regexPriorityOrder = []*regexp.Regexp{
 	token.StrRegex,
 
 	// Untyped constants
-	token.TrueRegex,
-	token.FalseRegex,
+	token.BoolLiteralRegex,
 	token.IntLiteralRegex,
 	token.StrLiteralRegex,
 	token.NilRegex,
@@ -43,16 +44,20 @@ var regexPriorityOrder = []*regexp.Regexp{
 
 /* STRUCT */
 type Lexer struct {
-	SourceCode     string
+	SourceCode     []byte
 	NextTokenIndex int
-	LineNumber     int
-	ColumnNumber   int
+	Lines          []int
 	Tokens         []token.Token
 }
 
+type Chunk struct {
+	Value           []byte
+	SourceCodeIndex int
+}
+
 /* FUNCTIONS */
-func NewLexer(sourceCode string) Lexer {
-	return Lexer{SourceCode: sourceCode, LineNumber: 1, ColumnNumber: 1}
+func NewLexer(sourceCode []byte) Lexer {
+	return Lexer{SourceCode: sourceCode, Lines: []int{0}}
 }
 
 /* METHODS */
@@ -67,30 +72,32 @@ func (l *Lexer) Print() {
 
 // Parse tokens from sourceCode
 func (l *Lexer) Parse() {
-	chunk := ""
+	startIndex := 0
 	for i := 0; i < len(l.SourceCode); i++ {
 		c := l.SourceCode[i]
 		if c == '\n' {
-			l.LineNumber++
-			l.ColumnNumber = 1
-		} else if c == '\t' {
-			l.ColumnNumber += 2
-		} else {
-			l.ColumnNumber++
+			l.Lines = append(l.Lines, i+1)
 		}
 
 		if c == ' ' || c == '\t' || c == '\n' {
-			l.extractTokens(chunk)
-			chunk = ""
-		} else {
-			chunk = chunk + string(c)
+			l.extractTokens(Chunk{Value: l.SourceCode[startIndex:i], SourceCodeIndex: startIndex})
+			startIndex = i + 1
 		}
 	}
 
-	l.extractTokens(chunk)
+	l.extractTokens(Chunk{Value: l.SourceCode[startIndex:len(l.SourceCode)], SourceCodeIndex: startIndex})
 }
 
-func (l *Lexer) Pop(kinds ...token.Kind) (token.Token, bool) {
+func (l *Lexer) Pop(kinds []token.Kind) (token.Token, bool) {
+	tk, ok := l.Peek(kinds)
+	if !ok {
+		return token.Token{}, false
+	}
+	l.NextTokenIndex++
+	return tk, ok
+}
+
+func (l *Lexer) Peek(kinds []token.Kind) (token.Token, bool) {
 	if l.NextTokenIndex < len(l.Tokens) {
 		tk := l.Tokens[l.NextTokenIndex]
 
@@ -107,52 +114,50 @@ func (l *Lexer) Pop(kinds ...token.Kind) (token.Token, bool) {
 			}
 		}
 
-		l.NextTokenIndex++
 		return tk, true
 	} else {
 		return token.Token{}, false
 	}
 }
 
-func (l *Lexer) UndoPops(nPops int) {
-	l.NextTokenIndex = l.NextTokenIndex - nPops
+func (l *Lexer) UndoPops(nPops uint) {
+	l.NextTokenIndex = l.NextTokenIndex - int(nPops)
 }
 
 /* PRIVATE */
 // Extract tokens from chunk
-func (l *Lexer) extractTokens(chunk string) {
-	for chunk = l.extractToken(chunk); len(chunk) > 0; chunk = l.extractToken(chunk) {
+func (l *Lexer) extractTokens(chunk Chunk) {
+	for len(chunk.Value) > 0 {
+		chunk = l.extractToken(chunk)
 	}
 }
 
 // Extract token from chunk
-type extractTokenMatch struct {
-	score int
-	token token.Token
-}
-
-func (l *Lexer) extractToken(chunk string) string {
-	if len(chunk) == 0 {
-		return ""
-	}
-
-	matches := []extractTokenMatch{}
+func (l *Lexer) extractToken(chunk Chunk) Chunk {
+	matches := []token.Token{}
 	for _, rgx := range regexPriorityOrder {
-		loc := rgx.FindStringIndex(chunk)
+		loc := rgx.FindStringIndex(string(chunk.Value))
 
 		if loc != nil && loc[0] == 0 {
-			matches = append(matches, extractTokenMatch{score: loc[1], token: token.Token{Kind: token.RegexToKind[rgx], Value: chunk[loc[0]:loc[1]]}})
+			matches = append(matches, token.Token{
+				Kind:            token.RegexToKind[rgx],
+				Value:           chunk.Value[loc[0]:loc[1]],
+				SourceCodeIndex: chunk.SourceCodeIndex,
+			})
 		}
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].score > matches[j].score
+		return len(matches[i].Value) > len(matches[j].Value)
 	})
 
 	if len(matches) > 0 {
-		l.Tokens = append(l.Tokens, matches[0].token)
-		return chunk[matches[0].score:]
+		l.Tokens = append(l.Tokens, matches[0])
+		chunk.Value = chunk.Value[len(matches[0].Value):]
+		chunk.SourceCodeIndex += len(matches[0].Value)
+		return chunk
 	}
 
-	panic(fmt.Sprintf("Couldn't identify chunk '%s'", chunk))
+	// TODO: Return LexerSyntaxError
+	panic(fmt.Sprintf("Couldn't identify chunk '%s'", chunk.Value))
 }
